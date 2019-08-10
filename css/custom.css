@@ -1,0 +1,53 @@
+.checked {
+  color: orange;
+}
+
+.search-results .uoc-ratings{
+  font-size: .5em;
+}
+
+.search-results h2{
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+div a.fa{
+  text-decoration:none!important;
+}
+
+#browser/*, #upload*/{
+  border: 2px solid lightgray;
+  padding: .5em;
+  margin-bottom: 1em;
+}
+
+.upload-area{
+  width: 100%;
+  height: 11em;
+  border: 2px solid lightgray;
+  background-color: beige; 
+  border-radius: 15px;
+  margin: 0 auto;
+  margin-top: 2em;
+  text-align: center;
+  overflow: auto;
+  font-size: .8em;
+
+}
+
+.upload-area:hover{
+  cursor: pointer;
+}
+
+.upload-area h1{
+  text-align: center;
+  font-weight: normal;
+  font-family: sans-serif;
+  line-height: 50px;
+  color: darkslategray;
+  margin-top:.2em;
+}
+
+#uploadfile{
+  display: none;
+}

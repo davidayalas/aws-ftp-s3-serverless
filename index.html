@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ca">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FTP Serverless</title>
+
+
+    <!--link href="css/styles.css" rel="stylesheet" /-->
+
+    <link href="css/gef.css" rel="stylesheet" />
+    <link href="css/cli-style.css" rel="stylesheet" />
+    <link href="css/app-blogs.css" rel="stylesheet" />
+    <link href="css/custom.css" rel="stylesheet" />
+    <style>
+            #logo{
+                width: 60%;
+            }
+
+            .btn-2 {
+                background-color: #00AFD1;
+            }
+            .btn-2 .round {
+                background-color: #00c4eb;
+            }
+
+            .type-1 a {
+                text-decoration: none;
+                -moz-border-radius: 30px;
+                -webkit-border-radius: 30px;
+                border-radius: 30px;
+                padding: 12px 53px 12px 23px;
+                color: #fff;
+                text-transform: uppercase;
+                font-family: sans-serif;
+                font-weight: bold;
+                position: relative;
+                -moz-transition: all 0.3s;
+                -o-transition: all 0.3s;
+                -webkit-transition: all 0.3s;
+                transition: all 0.3s;
+                display: inline-block;
+            }
+            .type-1 a span {
+                position: relative;
+                z-index: 3;
+            }
+            .type-1 a .round {
+                -moz-border-radius: 50%;
+                -webkit-border-radius: 50%;
+                border-radius: 50%;
+                width: 38px;
+                height: 38px;
+                position: absolute;
+                right: 3px;
+                top: 3px;
+                -moz-transition: all 0.3s ease-out;
+                -o-transition: all 0.3s ease-out;
+                -webkit-transition: all 0.3s ease-out;
+                transition: all 0.3s ease-out;
+                z-index: 2;
+            }
+            .type-1 a .round i {
+                position: absolute;
+                top: 50%;
+                margin-top: -6px;
+                left: 50%;
+                margin-left: -4px;
+                -moz-transition: all 0.3s;
+                -o-transition: all 0.3s;
+                -webkit-transition: all 0.3s;
+                transition: all 0.3s;
+            }
+
+            .txt {
+                font-size: 14px;
+                line-height: 1.45;
+            }
+
+            .type-1 a:hover {
+                padding-left: 48px;
+                padding-right: 28px;
+            }
+            .type-1 a:hover .round {
+                width: calc(100% - 6px);
+                -moz-border-radius: 30px;
+                -webkit-border-radius: 30px;
+                border-radius: 30px;
+            }
+            .type-1 a:hover .round i {
+                left: 12%;
+            }
+
+        </style>    
+</head>
+
+<body class="brand-secondary home">
+
+	<header>
+    <div class="header-2 brand-header brand-secondary">
+        <div class="container clearfix">
+            <div class="col-clear nav-menu-top">
+                <div class="hidden-xs hidden-sm desktop-menu">
+                    <div class="col-md-1 top-logo top-logo-desktop hidden-xs hidden-sm col-clear">
+                        <a href="https://uoc.edu" title="Universitat Oberta de Catalunya"><img src="images/uoc-logo.png" class="img-responsive w100" title="Universitat Oberta de Catalunya" alt="Universitat Oberta de Catalunya"></a>
+                    </div>
+                    <div class="col-md-10 col-lg-10 top-slogan col-clear-right">
+                        <span class="ruler ruler--white w100-inline-block"></span>
+                        <h2 class="nav-menu-title font-default">Universitat Oberta de Catalunya</h2>
+                        <span class="ruler ruler--white w100-inline-block"></span>
+                    </div>
+                    
+                </div>
+                <div class="hidden-lg hidden-xl hidden-md">
+                    <div class="mobile-menu">
+                        <div class="menu-mobile-container">
+                            <div class="top-logo">
+                                <!--a href="https://uoc.edu" title="Universitat Oberta de Catalunya"-->
+                                    <img src="images/uoc-logo.png" class="img-responsive w100" title="Universitat Oberta de Catalunya" alt="Universitat Oberta de Catalunya">
+                                <!--/a-->
+                            </div>
+                            <div class="top-slogan">
+                                <h2 class="ruler ruler--double ruler--white w100-inline-block nav-menu-title font-default">Universitat Oberta de Catalunya</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</header>
+
+	<main id="main" class="site-main" role="main">
+	    <div class="container">
+	       
+
+            <div class="row">
+                <div class="block-header-one-column">
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="col-md-12">   
+
+                <!-- LOGIN BUTTON -->
+                <div class="type-1">
+                    <div id="login_container" style="display:none">
+                        <a href="#" id="login" class="btn btn-2">
+                            <span class="txt">Entra</span>
+                            <span class="round" style="font-size: 0.8rem;"><i class="fa fa-chevron-right"></i></span>
+                        </a>
+                    </div>
+
+                    <div id="browser_container" style="display:none">
+                        <h2></h2>
+
+                        <div id="browser">
+
+                        </div>
+
+                        <form id="upload" method="post" enctype="multipart/form-data">
+                            <input type="file" name="file" id="uploadfile" />
+                            <!--input type="submit" name="submit" value="Envia" /-->
+                            <!-- Drag and Drop container-->
+                              <div class="upload-area"  id="uploadfiledrag">
+                                <h1>Drag and Drop file here<br/>Or<br/>Click to select file</h1>
+                            </div>                            
+                        </form>
+                    </div>
+                </div>
+            
+
+      			</div>
+	    </div>
+	</main>
+
+  <footer role="contentinfo" class="hidden-xs hidden-sm font-alternate">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-3 -lg-4">
+          <h4 class=footer-title>Universitat Oberta de Catalunya</h4>
+        </div>
+        <div class="col-md-9 col-lg-8">
+          
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous" defer></script>
+  <script src="js/login.js" defer></script>
+  <script src="js/upload.js" defer></script>
+  <script src="js/browsing.js" defer></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
+</body>
+
+</html>
