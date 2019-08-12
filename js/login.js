@@ -64,35 +64,11 @@ function showName(){
         $("#login_container").css("display","none");
         $("#browser_container").css("display","block");
         $("#browser_container h2").text("Hola " + window.localStorage.getItem("token_name"));
-        getUploadForm();
+        //getUploadForm();
+        getFiles();
     }
-
 }
 
-function getUploadForm(){
-    $.ajax({
-        type: "GET", 
-        url: "https://favyoweaj6.execute-api.eu-west-1.amazonaws.com/dev/getuploadform?success_redirect=",
-        headers: {
-            "Authorization": window.localStorage.getItem("token")
-        },   
-        dataType: 'json',
-        crossDomain: true,
-        contentType: 'application/json',
-        error: function(e) {
-        },       
-        success: function(data){
-            var form = $("form#upload");
-            $(form).attr("action", data.endpoint)
-            for(var key in data){
-                if(key!=="endpoint"){
-                 $('<input type="hidden" name="'+key+'" value="'+data[key]+'"/>').insertBefore($("#uploadfile"));
-                }
-            }
-            getFiles();
-        } 
-    });
-   
-}
+
                     
                     
