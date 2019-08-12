@@ -1,4 +1,5 @@
 function getUploadForm(callback){
+    console.log("getUploadForm")
     $.ajax({
         type: "GET", 
         url: "https://favyoweaj6.execute-api.eu-west-1.amazonaws.com/dev/getuploadform?success_redirect=",
@@ -11,6 +12,7 @@ function getUploadForm(callback){
         error: function(e) {
         },       
         success: function(data){
+            console.log(data)
             window.signedFormData = data;
             if(typeof callback==="function"){
                 callback();
@@ -19,11 +21,15 @@ function getUploadForm(callback){
     });
 }
 
-function generateFormData(_fnUpload, file){
+function generateFormData(_fnUpload, file, path){
     var fd = new FormData();
     for(var k in window.signedFormData){
         if(["endpoint"].indexOf(k)===-1){
-            fd.append(k, window.signedFormData[k]);
+            if(k==="key"){
+                fd.append(k, window.signedFormData[k].replace("/","/"+path));
+            }else{
+                fd.append(k, window.signedFormData[k]);
+            }
         }
     }
     fd.append('file', file);
@@ -45,12 +51,30 @@ function fnUpload(formdata){
     });
 }
 
+function traverseFileTree(item, path) {
+    path = path || "";
+    if (item.isFile) {
+      // Get file
+      item.file(function(file) {
+        uploadData(file, path);
+      });
+    } else if (item.isDirectory) {
+      // Get folder contents
+      var dirReader = item.createReader();
+      dirReader.readEntries(function(entries) {
+        for (var i=0; i<entries.length; i++) {
+          traverseFileTree(entries[i], path + item.name + "/");
+        }
+      });
+    }
+  }
+
 // Sending AJAX request and upload file
-function uploadData(file){
+function uploadData(file, path){
     if(!window.signedFormData){
-        getUploadForm(function(){generateFormData(fnUpload,file)});
+        getUploadForm(function(){generateFormData(fnUpload,file,path)});
     }else{
-        generateFormData(fnUpload,file);
+        generateFormData(fnUpload,file,path);
     }
 }
 
@@ -84,8 +108,16 @@ $(function() {
         e.stopPropagation();
         e.preventDefault();
         $("h1").text("Upload");
-        var file = e.originalEvent.dataTransfer.files;
-        uploadData(file[0]);
+        //var file = e.originalEvent.dataTransfer.files;
+        var items = event.dataTransfer.items;
+        for (var i=0; i<items.length; i++) {
+          // webkitGetAsEntry is where the magic happens
+          var item = items[i].webkitGetAsEntry();
+          if (item) {
+            traverseFileTree(item);
+          }
+        } 
+        //uploadData(file[0]);
     });
 
     // Open file selector on div click

@@ -1,5 +1,5 @@
 function getFiles(){
-    console.log(window.localStorage.getItem("token"))
+    //console.log(window.localStorage.getItem("token"))
     $.ajax({
         type: "GET", 
         url: "https://favyoweaj6.execute-api.eu-west-1.amazonaws.com/dev/getfiles",
@@ -11,10 +11,10 @@ function getFiles(){
         withCredentials: true,
         contentType: 'application/json',
         error: function(e) {
-            console.log(e)
+            //console.log(e)
         },       
         success: function(data){
-            console.log(data);
+            //console.log(data);
             drawExplorer(data);            
         } 
     });
