@@ -117,7 +117,6 @@ $(function() {
             traverseFileTree(item);
           }
         } 
-        //uploadData(file[0]);
     });
 
     // Open file selector on div click
@@ -127,11 +126,9 @@ $(function() {
 
     // file selected
     $("#uploadfile").change(function(){
-        //uploadData(generateFormData($('#uploadfile')[0].files[0]));
-        if(!window.signedFormData){
-            getUploadForm(function(){generateFormData(fnUpload,$('#uploadfile')[0].files[0])});
-        }else{
-            generateFormData(fnUpload,$('#uploadfile')[0].files[0]);
-        }
+        var items = $('#uploadfile')[0].files;
+        for (var i=0; i<items.length; i++) {
+          uploadData(items[i], items[i].webkitRelativePath.replace(items[i].name,""));
+        } 
     });
 });
