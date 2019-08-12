@@ -4,7 +4,7 @@ function deleteKeys(keys){
     }
     $.ajax({
         type: "POST", 
-        url: "https://favyoweaj6.execute-api.eu-west-1.amazonaws.com/dev/deletekey",
+        url: "https://favyoweaj6.execute-api.eu-west-1.amazonaws.com/dev/deletekeys",
         headers: {
             "Authorization": window.localStorage.getItem("token")
         },     
@@ -12,7 +12,7 @@ function deleteKeys(keys){
         crossDomain: true,
         withCredentials: true,
         contentType: 'application/json',
-        data: {"keys" : keys},
+        data: JSON.stringify({"keys" : keys}),
         error: function(e) {
             //console.log(e)
         },       
