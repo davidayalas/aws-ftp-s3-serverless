@@ -1,5 +1,11 @@
+function createFolderInput(){
+    var folder = prompt("Nom del directori", "directori");
+    if(folder){
+        uploadData(new File([""], folder,{"type":"text/plain", webkitRelativePath: ""}));
+    }
+}
+
 function getUploadForm(callback){
-    console.log("getUploadForm")
     $.ajax({
         type: "GET", 
         url: "https://favyoweaj6.execute-api.eu-west-1.amazonaws.com/dev/getuploadform?success_redirect=",
@@ -12,7 +18,7 @@ function getUploadForm(callback){
         error: function(e) {
         },       
         success: function(data){
-            console.log(data)
+            //console.log(data)
             window.signedFormData = data;
             if(typeof callback==="function"){
                 callback();
@@ -22,6 +28,7 @@ function getUploadForm(callback){
 }
 
 function generateFormData(_fnUpload, file, path){
+    path = window.currentDir + path;
     var fd = new FormData();
     for(var k in window.signedFormData){
         if(["endpoint"].indexOf(k)===-1){
@@ -71,6 +78,7 @@ function traverseFileTree(item, path) {
 
 // Sending AJAX request and upload file
 function uploadData(file, path){
+    console.log(file)
     if(!window.signedFormData){
         getUploadForm(function(){generateFormData(fnUpload,file,path)});
     }else{

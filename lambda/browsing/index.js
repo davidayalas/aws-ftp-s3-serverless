@@ -12,36 +12,44 @@ var options = {
 }
 
 exports.handler = async (event, context) => {
-
     let user = null;
     if(event.requestContext && event.requestContext.authorizer && event.requestContext.authorizer.user){
         user = JSON.parse(event.requestContext.authorizer.user);
-    }   
-
+    }
+    console.log(event.requestContext)
     if(!user){
-       return "no user, no live";
+       return { 
+        "statusCode": 403,
+        "message": "no user, no live",
+        "headers" : {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin' : '*',
+            'Access-Control-Allow-Credentials' : true,
+            'Access-Control-Allow-Methods' : '*'
+        }
+       };
+    }
+    
+    let path = '';
+    if(event.queryStringParameters && event.queryStringParameters.path) {
+        path += event.queryStringParameters.path + '/';
     }
 
     const params = {
         Bucket: options.bucket,
         Delimiter: '/',
-        Prefix: user + '/'
+        Prefix: user + '/' + path
     };
 
-    const data = await s3.listObjects(params).promise();
-    
-    var files = []
-    data.Contents.forEach((elem) => {
-      console.log(elem.Key);
-      var key = elem.Key;
-      var lastModified = elem.LastModified;
-      var size = elem.Size;
-      files.push({ key, lastModified, size  });
-    });
+    if(event.queryStringParameters && event.queryStringParameters.continuationToken) {
+        params.NextContinuationToken = event.queryStringParameters.continuationToken;
+    }
+
+    const data = await s3.listObjectsV2(params).promise();
     
     return { 
         "statusCode": 200,
-        "body" : JSON.stringify(files),
+        "body" : JSON.stringify(data),
         "headers" : {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin' : '*',

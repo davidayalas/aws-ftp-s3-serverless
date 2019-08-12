@@ -147,36 +147,44 @@
             <div class="row">
                 <div class="col-md-12">   
 
-                <!-- LOGIN BUTTON -->
-                <div class="">
-                    <div id="login_container" class="type-1" style="display:none">
-                        <a href="#" id="login" class="btn btn-2">
-                            <span class="txt">Entra</span>
-                            <span class="round" style="font-size: 0.8rem;"><i class="fa fa-chevron-right"></i></span>
-                        </a>
-                    </div>
+                    <div class="">
 
-                    <div id="browser_container" style="display:none">
-                        <h2></h2>
-
-                        <div id="browser">
-
+                        <!-- LOGIN BUTTON -->
+                        <div id="login_container" class="type-1" style="display:none">
+                            <a href="#" id="login" class="btn btn-2">
+                                <span class="txt">Entra</span>
+                                <span class="round" style="font-size: 0.8rem;"><i class="fa fa-chevron-right"></i></span>
+                            </a>
                         </div>
 
-                        <form id="upload" method="post" enctype="multipart/form-data">
-                            <input type="file" name="file" id="uploadfile" webkitdirectory multiple />
-                            <!--input type="submit" name="submit" value="Envia" /-->
-                            <!-- Drag and Drop container-->
-                              <div class="upload-area"  id="uploadfiledrag">
-                                <h1>Arrosega o clica per a seleccionar</h1>
-                            </div>                            
-                        </form>
+                        <div id="browser_container" style="display:none">
+                            
+                            <div>
+                                <h2 class="pull-left"></h2>
+                                <a href="#" onclick="createFolderInput()"><i class="fa fa-plus pull-right fa-2x" aria-hidden="true" title="Crea un directori en aquest nivell"></i></a>
+                                <a href="#" onclick="getFiles(window.currentDir)"><i class="fa fa-refresh pull-right fa-2x" aria-hidden="true"></i></a>
+                                <a href="#" onclick="deleteAll()"><i class="fa fa-trash pull-right fa-2x" aria-hidden="true"></i></a>
+                            </div>
+
+                            <div id="browser">
+
+                            </div>
+
+                            <form id="upload" method="post" enctype="multipart/form-data">
+                                <input type="file" name="file" id="uploadfile"  multiple />
+                                <!--input type="submit" name="submit" value="Envia" /-->
+                                <!-- Drag and Drop container-->
+                                <div class="upload-area"  id="uploadfiledrag">
+                                    <h1>Arrosega o clica per a seleccionar</h1>
+                                </div>                            
+                            </form>
+                        </div>
                     </div>
-                </div>
             
 
-      			</div>
-	    </div>
+                </div>
+            </div>
+        </div>
 	</main>
 
   <footer role="contentinfo" class="hidden-xs hidden-sm font-alternate">
@@ -192,10 +200,11 @@
     </div>
   </footer>
 
-  <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous" defer></script>
-  <script src="js/login.js" defer></script>
-  <script src="js/upload.js" defer></script>
-  <script src="js/browsing.js" defer></script>
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+  <script src="js/login.js" ></script>
+  <script src="js/upload.js"></script>
+  <script src="js/browsing.js"></script>
+  <script src="js/delete.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 
