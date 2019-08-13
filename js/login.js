@@ -75,6 +75,7 @@ function showName(){
             uploadarea_selector: ".upload-area",
             uploadarea_message_selector: ".upload-area h1",
             logarea_selector: ".log-area",
+            max_upload_threads: 15,
             messages : {
                 "ondelete" : "Segur que vols eliminar els fitxers?"
             }

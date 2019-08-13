@@ -141,6 +141,12 @@
   width: 50%;
 }
 
-#browser-toc td.ftps3-item-date, #browser-toc td.ftps3-item-size{
+#browser-toc td.ftps3-item-date, #browser-toc td.ftps3-item-filesize{
   width: 25%;
+}
+
+@media screen and (max-width: 736px) {
+  #browser-toc td.ftps3-item-date, #browser-toc td.ftps3-item-filesize{
+    display: none;
+  }
 }

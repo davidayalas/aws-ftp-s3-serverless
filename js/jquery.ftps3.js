@@ -15,7 +15,37 @@
     var settings = {};
     var explorer = null;
     var queue = [];
-    var counter = 0;
+    var queue_counter = 0;
+
+    var uploadqueue = {
+        push : function(item){
+            queue.push(item);
+        },
+        length : function(){
+            return queue.length;
+        },
+        process: function(c){
+            if(c){
+                queue_counter = queue_counter+c;
+            }
+            _processUploadQueue();
+        },
+        startNewQueue: function(){
+            if(queue_counter<settings.max_upload_threads){
+                return true;
+            }
+            return false;
+        },
+        queuesLength: function(reset){
+            if(reset){
+                queue_counter = 0;
+            }
+            return queue_counter;
+        },
+        getItem: function(){
+            return queue.shift();
+        }
+    }    
 
     $.ftps3 = function(options) {
         /*
@@ -29,6 +59,7 @@
                 uploadarea_selector: "",
                 uploadarea_message_selector: "",
                 logarea_selector : "",
+                max_upload_threads : 10,
                 messages: {
                     "dragover_html" : "Drag here",
                     "dragenter" : "Drop",
@@ -43,6 +74,7 @@
         */
        if(!settings.auth_token){
            settings = $.extend(true, {
+            max_upload_threads : 10,
             messages: {
                 "dragover_html" : "Drag here",
                 "dragenter" : "Drop",
@@ -50,38 +82,29 @@
                 "ondrop" : "Upload",
                 "onuploading" : "Uploading...",
                 "onfinish" : "Uploaded!",
-                "ondelete" : "Are you sure you want to delete key/s?"
+                "ondelete" : "Are you sure you want to delete key/s?",
+                "folder_prompt" : "Folder name?",
+                "folder_prompt_value" : "folder"
             }               
            }, options);
 
            explorer = $(settings.browser_selector);
        }
+
        return {
             getKeys : function(path, refresh){_getKeys(path, refresh);},
             setUpload : function(){_setUpload();},
             deleteKeys : function(){_deleteAll();},
             createFolder : function(){_createFolderInput();},
             getExplorer : function(){return explorer;},
-            uploadqueue : {
-                push : function(item){
-                    queue.push(item);
-                },
-                length : function(){
-                    return queue.length;
-                },
-                process: function(){
-                    _processQueue();
-                },
-                getItem: function(){
-                    return queue.shift();
-                }
-                
-            }
        }
     }
 
+    /*
+    * Create a folder in route
+    */
     var _createFolderInput = function(){
-        var folder = prompt("Nom del directori", "directori");
+        var folder = prompt(settings.folder_prompt, settings.folder_value);
         if(folder){
             uploadData(new File([""], ""),folder+"/");
         }
@@ -98,7 +121,7 @@
         }
 
         if(path && path.slice(-1)==="/"){
-            path = path.slice(0, path.length-1)
+            path = path.slice(0, path.length-1);
         }
     
         if(path){
@@ -128,6 +151,9 @@
         });
     }
 
+    /*
+    * aux function to get size from bytes
+    */
     var _bytesToSize = function(bytes) {
         var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
         if (bytes == 0){return '0 Byte';}
@@ -135,11 +161,17 @@
         return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
     };
 
+    /*
+    * aux function to format data
+    */
     var _getDate = function(_date){
         _date = new Date(_date);
         return ('0' + _date.getDate()).slice(-2) + "/" + ('0'+(_date.getMonth()+1)).slice(-2) +  "/" + _date.getFullYear() + " - " + ('0' + _date.getHours()).slice(-2) + ":" + ('0' + _date.getMinutes()).slice(-2);
     }
 
+    /*
+    * draw explorer into DOM selector
+    */
     var _drawExplorer = function(data){
         var explorer = $.ftps3().getExplorer();
         $(explorer).html("");
@@ -200,6 +232,10 @@
     * A drop zone is observer and you can drop or click (files or directories) that are uploaded automatically to S3
     */
     var _setUpload = function(){
+
+        // creates input file type
+        $('<input type="file" name="file" id="ftps3_uploadfile" multiple style="display:none" />').appendTo($(settings.uploadarea_selector).parent());
+
         // preventing page from redirecting
         $("html").on("dragover", function(e) {
             e.preventDefault();
@@ -228,20 +264,14 @@
             e.stopPropagation();
             e.preventDefault();
             $(settings.uploadarea_message_selector).text(settings.messages.ondrop);
-            //$(settings.logarea_selector).html("");
-            //var file = e.originalEvent.dataTransfer.files;
             var items = event.dataTransfer.items;
-            counter=0;
             for (var i=0; i<items.length; i++) {
-                // webkitGetAsEntry is where the magic happens
                 var item = items[i].webkitGetAsEntry();
                 if (item) {
                     _traverseFileTree(item);
                 }
             } 
         });
-
-        $('<input type="file" name="file" id="ftps3_uploadfile" multiple style="display:none" />').appendTo($(settings.uploadarea_selector).parent());
 
         // Open file selector on div click
         $(settings.uploadarea_selector).click(function(){
@@ -257,36 +287,38 @@
         });
     }
 
+    /* 
+    * process items in queue[]
+    */
     var _processUploadQueue = function() {
-        var item = $.ftps3().uploadqueue.getItem();
+        var item = uploadqueue.getItem();
         if(!item){
+            uploadqueue.queuesLength(true);
             _getKeys("",true);
             return;
         }
         uploadData(item[0], item[1], function(){
-            _processUploadQueue()
+            _processUploadQueue();
         });
     }
 
+    /*
+    * Loop over selected files and folders
+    */ 
     var _traverseFileTree = function(item, path) {
         path = path || "";
         if (item.isFile) {
           // Get and upload file
-          counter++;
           item.file(function(file) {
-            //uploadData(file, path);
-            $.ftps3().uploadqueue.push([file, path]);
-            counter--;
-            if(counter===0){
-                _processUploadQueue();
-                _processUploadQueue();
+            uploadqueue.push([file, path]);
+            if(((uploadqueue.length() % 100)===0 && uploadqueue.startNewQueue()) || uploadqueue.queuesLength()===0){
+                uploadqueue.process(1);
             }
           });
         
         } else if (item.isDirectory) {
           // Get folder contents
           var dirReader = item.createReader();
-
           var readEntries = function(){
             dirReader.readEntries(function(entries) {
                 if(entries.length===100){ //limit for call
@@ -328,6 +360,9 @@
         });
     }
     
+    /* 
+    * Aux function to clean name in order to put it as css classname
+    */
     var cleanName = function(_name){
         return _name
             .replace(/\./g,"-")
@@ -335,6 +370,9 @@
         ;
     }
 
+    /* 
+    * Generates form data to send with ajax request
+    */
     var _generateFormData = function(_fnUpload, file, path, cb){
         path = settings.currentDir + path;
         var fd = new FormData();
@@ -354,6 +392,9 @@
         _fnUpload(fd, cb);
     }
     
+    /*
+    * Ajax function to upload form data signed
+    */
     var _ajaxUploadPost = function(formdata, cb){
         $(settings.uploadarea_message_selector).text(settings.messages.onuploading);
         $.ajax({
@@ -415,6 +456,10 @@
         });
     }
     
+
+    /*
+    * Get all files to delete from interface
+    */
     var _deleteAll = function(){
         var message=settings.messages.ondelete;
         if($(settings.browser_selector + " input.ftps3-todelete:checked").length>0 && window.confirm(message)){
