@@ -14,10 +14,11 @@ function deleteKeys(keys){
         contentType: 'application/json',
         data: JSON.stringify({"keys" : keys}),
         error: function(e) {
-            //console.log(e)
         },       
         success: function(data){
-            //console.log(data);
+            if(data.message==="done"){
+                getFiles(window.currentDir);
+            }
         } 
     });
 }
@@ -28,7 +29,6 @@ function deleteAll(){
         var keys = [];
         $("input.toDelete:checked").each(function(){
             keys.push(this.value);
-            console.log(this.value)
         });
         deleteKeys(keys)
     }

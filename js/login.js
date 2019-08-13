@@ -18,7 +18,6 @@ window.addEventListener('message', function(e) {
         return;
     }
     var message = JSON.parse(decoder(e.data.split(".")[1]));
-    console.log(message)
     window.localStorage.setItem("token_ttl", message.exp);
     window.localStorage.setItem("token", e.data);
     window.localStorage.setItem("token_name", message["urn:oid:2.5.4.42"]);
@@ -65,7 +64,19 @@ function showName(){
         $("#browser_container").css("display","block");
         $("#browser_container h2").text("Hola " + window.localStorage.getItem("token_name"));
         //getUploadForm();
-        getFiles();
+
+        $.ftps3({
+            endpoint_signedform : "https://favyoweaj6.execute-api.eu-west-1.amazonaws.com/dev/getuploadform",
+            endpoint_browse : "https://favyoweaj6.execute-api.eu-west-1.amazonaws.com/dev/getfiles",
+            endpoint_delete : "https://favyoweaj6.execute-api.eu-west-1.amazonaws.com/dev/deletekeys",
+            auth_token : window.localStorage.getItem("token"),
+            key_root : window.localStorage.getItem("token_email"),
+            browser_selector: "#browser",
+            uploadarea_selector: ".upload-area",
+            uploadarea_message_selector: ".upload-area h1",
+        }).getKeys();
+
+        $.ftps3().setUpload();
     }
 }
 

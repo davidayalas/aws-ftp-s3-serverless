@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ca">
+
+<head>
+    <title>FTP Serverless</title>
+    <style>
+        div{
+            display: block;
+        }
+
+        div#actions, div#browser, div.upload-area{
+            border: 1px solid #ddd;
+            margin-bottom: 1em;
+        }
+        
+    </style>
+</head>
+
+<body>
+	<header>
+
+    </header>
+
+	<main>
+	    <div>
+	       
+
+            <!-- LOGIN BUTTON -->
+            <div id="login_container">
+                <a href="#" id="login">
+                    <span class="txt">Entra</span>
+                </a>
+            </div>
+
+            <div id="browser_container" style="display:none">
+                <div id="actions">
+                    <h2></h2>
+                    <a href="#" onclick="createFolderInput()"><i class="fa fa-plus fa-2x" aria-hidden="true" title="Crea un directori en aquest nivell"></i></a>
+                    <a href="#" onclick="$.ftps3().getKeys()"><i class="fa fa-refresh fa-2x" aria-hidden="true"></i></a>
+                    <a href="#" onclick="$.ftps3().deleteKeys()"><i class="fa fa-trash fa-2x" aria-hidden="true"></i></a>
+                </div>
+
+                <div id="browser">
+
+                </div>
+
+                <form id="upload" method="post" enctype="multipart/form-data">
+                    <!--input type="submit" name="submit" value="Envia" /-->
+                    <!-- Drag and Drop container-->
+                    <div class="upload-area" id="uploadfiledrag">
+                        <h1>Arrosega o clica per a seleccionar</h1>
+                    </div>                            
+                </form>
+            </div>
+            
+
+	</main>
+
+
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+  <script src="js/jquery.ftps3.js"></script>
+  <script src="js/login.js" ></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
+</body>
+
+</html>
