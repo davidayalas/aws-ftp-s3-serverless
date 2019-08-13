@@ -6,7 +6,7 @@
 
 /*
  * Out goal is to provide a "FTP" interface to users. 
- * Under a bucket, users have access only to their "folder", in our case their "email" from SAML assertion. 
+ * Under a bucket, users have access only to their "folder", in our case their "email" from SAML or OAuth. 
  * This field is the option param "key_root"
 */ 
 
@@ -25,23 +25,53 @@
                 browser_selector: ""
                 uploadarea_selector: "",
                 uploadarea_message_selector: ""
+                messages: {
+                    "dragover_html" : "Drag here",
+                    "dragenter" : "Drop",
+                    "dragover_uploadarea" : "Drop",
+                    "ondrop" : "Upload",
+                    "onuploading" : "Uploading...",
+                    "onfinish" : "Uploaded!",
+                    "ondelete" : "Are you sure you want to delete key/s?"
+                }
             }
         
         */
        if(!settings.auth_token){
-           settings = $.extend({}, options);
+           settings = $.extend(true, {
+            messages: {
+                "dragover_html" : "Drag here",
+                "dragenter" : "Drop",
+                "dragover_uploadarea" : "Drop",
+                "ondrop" : "Upload",
+                "onuploading" : "Uploading...",
+                "onfinish" : "Uploaded!",
+                "ondelete" : "Are you sure you want to delete key/s?"
+            }               
+           }, options);
        }
        return {
-            getKeys : function(path){_getKeys(path);},
+            getKeys : function(path, refresh){_getKeys(path, refresh);},
             setUpload : function(){_setUpload();},
-            deleteKeys : function(){_deleteAll();}
+            deleteKeys : function(){_deleteAll();},
+            createFolder : function(){_createFolderInput();}
        }
     }
 
-    /* Browse keys and draw */
+    var _createFolderInput = function(){
+        var folder = prompt("Nom del directori", "directori");
+        if(folder){
+            uploadData(new File([""], ""),folder+"/");
+        }
+    }
+
+    /* 
+    * Get keys from backend and draws a simple interface
+    */
     var _getKeys = function(path, refresh){
         if(refresh){
             path = settings.currentDir;
+            console.log(settings.currentDir)
         }
         if(path && path.slice(-1)==="/"){
             path = path.slice(0, path.length-1)
@@ -52,7 +82,8 @@
             querystring = "?path=" + path; 
         }
     
-        //continuationToken --> 
+        // TODO param continuationToken is available on lambda endpoint
+
         $.ajax({
             type: "GET", 
             url: settings.endpoint_browse+querystring,
@@ -66,16 +97,16 @@
             error: function(e) {
             },       
             success: function(data){
-                drawExplorer(data);            
+                _drawExplorer(data);            
             } 
         });
     }
 
-    var drawExplorer = function(data){
+    var _drawExplorer = function(data){
         var explorer = $(settings.browser_selector);
         $(explorer).html("");
     
-        var keyRoot = settings.key_root; //to remove due our interactions with our lambdas
+        var keyRoot = settings.key_root; //to remove due our interaction with our lambdas
         var aux;
     
         var isRoot = (data.Prefix.replace(keyRoot+"/","")==="" ? true : false);
@@ -87,11 +118,11 @@
         var currentPath = "";
 
         if(settings.currentDir!==""){
-            $("<p><i class='fa fa-angle-right'></i> "+settings.currentDir+"</p>").appendTo(explorer);
+            $("<p class='ftps3-path'><i class='fa fa-angle-right'></i> "+settings.currentDir+"</p>").appendTo(explorer);
         }
 
         if(!isRoot){
-            $("<p><i class='fa fa-folder' aria-hidden='true'></i> <a href='#' onclick='$.ftps3().getKeys(\""+parent+"\")'>..</a></p>").appendTo(explorer);
+            $("<p class='ftps3-parent-folder'><i class='fa fa-folder' aria-hidden='true'></i> <a href='#' onclick='$.ftps3().getKeys(\""+parent+"\")'>..</a></p>").appendTo(explorer);
         }
     
         for(var i=0,z=data.CommonPrefixes.length;i<z;i++){
@@ -100,24 +131,27 @@
                 aux = aux.slice(0,aux.length-1);
             }
             currentPath = data.CommonPrefixes[i].Prefix.replace(keyRoot+"/","");
-            $("<p><input type='checkbox' value='"+currentPath+"' class='toDelete'/> <i class='fa fa-folder' aria-hidden='true'></i> <a href='#' onclick='$.ftps3().getKeys(\""+settings.currentDir+aux+"\")'>" + aux + "</a></p>").appendTo(explorer);
+            $("<p class='ftps3-item-folder'><input type='checkbox' value='"+currentPath+"' class='ftps3-todelete' /> <i class='fa fa-folder' aria-hidden='true'></i> <a href='#' onclick='$.ftps3().getKeys(\""+settings.currentDir+aux+"\")'>" + aux + "</a></p>").appendTo(explorer);
         }
     
         for(var i=0,z=data.Contents.length;i<z;i++){
             aux = data.Contents[i].Key.slice(data.Contents[i].Key.lastIndexOf("/")+1);
             if(aux!==""){
-                $("<p><input type='checkbox' class='toDelete' value='"+data.Contents[i].Key.replace(keyRoot+"/","")+"'/> <i class='fa fa-file' aria-hidden='true'></i> " + aux + "</p>").appendTo(explorer);
+                $("<p class='ftps3-item-file'><input type='checkbox' class='ftps3-todelete' value='"+data.Contents[i].Key.replace(keyRoot+"/","")+"'/> <i class='fa fa-file' aria-hidden='true'></i> " + aux + "</p>").appendTo(explorer);
             }
         }    
     }
 
-    /* UPLOAD MANAGEMENT */
+    /* 
+    * Upload management interface
+    * A drop zone is observer and you can drop or click (files or directories) that are uploaded automatically to S3
+    */
     var _setUpload = function(){
         // preventing page from redirecting
         $("html").on("dragover", function(e) {
             e.preventDefault();
             e.stopPropagation();
-            $(settings.uploadarea_message_selector).text("Drag here");
+            $(settings.uploadarea_message_selector).text(settings.messages.dragover_html);
         });
 
         $("html").on("drop", function(e) { e.preventDefault(); e.stopPropagation(); });
@@ -126,21 +160,21 @@
         $(settings.uploadarea_selector).on('dragenter', function (e) {
             e.stopPropagation();
             e.preventDefault();
-            $(settings.uploadarea_message_selector).text("Drop");
+            $(settings.uploadarea_message_selector).text(settings.messages.dragenter);
         });
 
         // Drag over
         $(settings.uploadarea_selector).on('dragover', function (e) {
             e.stopPropagation();
             e.preventDefault();
-            $(settings.uploadarea_message_selector).text("Drop");
+            $(settings.uploadarea_message_selector).text(settings.messages.dragover_uploadarea);
         });
 
         // Drop
         $(settings.uploadarea_selector).on('drop', function (e) {
             e.stopPropagation();
             e.preventDefault();
-            $(settings.uploadarea_message_selector).text("Upload");
+            $(settings.uploadarea_message_selector).text(settings.messages.ondrop);
             //var file = e.originalEvent.dataTransfer.files;
             var items = event.dataTransfer.items;
             for (var i=0; i<items.length; i++) {
@@ -171,7 +205,7 @@
     var _traverseFileTree = function(item, path) {
         path = path || "";
         if (item.isFile) {
-          // Get file
+          // Get and upload file
           item.file(function(file) {
             uploadData(file, path);
           });
@@ -186,7 +220,9 @@
         }
       }
 
-      //Gets upload signed data from backend
+      /*
+      * Gets upload signed data from backend --> https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-post-example.html
+      */
       var _getUploadForm = function(callback){
         $.ajax({
             type: "GET", 
@@ -214,6 +250,7 @@
         for(var k in settings.signedFormData){
             if(["endpoint"].indexOf(k)===-1){
                 if(k==="key"){
+                    console.log(settings.signedFormData[k].replace("/","/"+path))
                     fd.append(k, settings.signedFormData[k].replace("/","/"+path));
                 }else{
                     fd.append(k, settings.signedFormData[k]);
@@ -225,7 +262,7 @@
     }
     
     var _ajaxUploadPost = function(formdata){
-        $(settings.uploadarea_message_selector).text("Uploading...");
+        $(settings.uploadarea_message_selector).text(settings.messages.onuploading);
         $.ajax({
             url: settings.signedFormData.endpoint,
             type: 'POST',
@@ -234,12 +271,13 @@
             dataType: 'json',
             contentType: false,
             success: function(response){
-                $(settings.uploadarea_message_selector).text("Uploaded!");
+                $(settings.uploadarea_message_selector).text(settings.messages.onfinish);
             }
         });
     }      
  
     var uploadData = function(file, path){
+        console.log(JSON.stringify(file) + " " + path)
         if(!settings.signedFormData){
             _getUploadForm(function(){_generateFormData(_ajaxUploadPost,file,path)});
         }else{
@@ -247,7 +285,11 @@
         }
     }
 
-    /* DELETE MANAGEMENT */
+    /* 
+    * Delete management. 
+    * Gets all keys checked (input.ftps3-todelete:checked) and sends to lambda backend. 
+    * POST better than DELETE because we need send body
+    */
     var _deleteKeys = function(keys){
         if(!keys){
             return;
@@ -274,10 +316,10 @@
     }
     
     var _deleteAll = function(){
-        var message="Segur que vols eliminar els fitxers?";
-        if($(settings.browser_selector + " input.toDelete:checked").length>0 && window.confirm(message)){
+        var message=settings.messages.ondelete;
+        if($(settings.browser_selector + " input.ftps3-todelete:checked").length>0 && window.confirm(message)){
             var keys = [];
-            $(settings.browser_selector + " input.toDelete:checked").each(function(item){
+            $(settings.browser_selector + " input.ftps3-todelete:checked").each(function(item){
                 keys.push(this.value);
             });
             _deleteKeys(keys)

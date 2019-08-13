@@ -58,18 +58,18 @@ exports.handler = async (event, context) => {
     return { 
         "statusCode": 200,
         "body" : JSON.stringify({
-        'endpoint' : "https://s3-" + options.region + ".amazonaws.com/" + options.bucket + "/",
-        'key' : user + '/${filename}',
-        'acl' : 'private',
-        'success_action_redirect' : success_redirect,
-       'x-amz-server-side-encryption' : 'AES256',
- 	   'x-amz-credential' : xamzcredential,
- 	   'x-amz-algorithm' : 'AWS4-HMAC-SHA256',
- 	   'x-amz-date' : signingDate,
- 	   'Policy' : policy64,
- 	   'x-amz-signature' : signature.toString()
-
-        }),
+            'endpoint' : "https://s3-" + options.region + ".amazonaws.com/" + options.bucket + "/",
+            'key' : user + '/${filename}',
+            'acl' : 'private',
+            'success_action_redirect' : success_redirect,
+            'x-amz-server-side-encryption' : 'AES256',
+            'x-amz-credential' : xamzcredential,
+            'x-amz-algorithm' : 'AWS4-HMAC-SHA256',
+            'x-amz-date' : signingDate,
+            'Policy' : policy64,
+            'x-amz-signature' : signature.toString()
+            }
+        ),
         "headers" : {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin' : '*',

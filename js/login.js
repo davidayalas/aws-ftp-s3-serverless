@@ -74,6 +74,9 @@ function showName(){
             browser_selector: "#browser",
             uploadarea_selector: ".upload-area",
             uploadarea_message_selector: ".upload-area h1",
+            messages : {
+                "ondelete" : "Segur que vols eliminar els fitxers?"
+            }
         }).getKeys();
 
         $.ftps3().setUpload();
