@@ -45,7 +45,7 @@ function Login(title, w, h){
 
 $(document).ready(function(){
     $("#login").on("click", function(){
-        Login("login",400,400);
+        Login("login",430,430);
         return false;
     });
 
@@ -82,7 +82,3 @@ function showName(){
         $.ftps3().setUpload();
     }
 }
-
-
-                    
-                    

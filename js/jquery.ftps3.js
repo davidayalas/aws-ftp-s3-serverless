@@ -71,7 +71,6 @@
     var _getKeys = function(path, refresh){
         if(refresh){
             path = settings.currentDir;
-            console.log(settings.currentDir)
         }
         if(path && path.slice(-1)==="/"){
             path = path.slice(0, path.length-1)
@@ -95,6 +94,9 @@
             withCredentials: true,
             contentType: 'application/json',
             error: function(e) {
+                if(e.status===401){
+                    window.location.reload();
+                }
             },       
             success: function(data){
                 _drawExplorer(data);            
@@ -118,7 +120,20 @@
         var currentPath = "";
 
         if(settings.currentDir!==""){
-            $("<p class='ftps3-path'><i class='fa fa-angle-right'></i> "+settings.currentDir+"</p>").appendTo(explorer);
+            console.log(settings.currentDir.split("/"))
+            var breadcrumbs = settings.currentDir.split("/");
+            var breadcrumbs_items = [];
+            var breadcrumbs_path=[];
+            for(var i=0,z=breadcrumbs.length;i<z;i++){
+                if(breadcrumbs[i]===""){
+                    continue;
+                }
+                breadcrumbs_path.push(breadcrumbs[i]);
+                breadcrumbs_items.push((i<(z-2)?" <a href='#' onclick='$.ftps3().getKeys(\""+breadcrumbs_path.join("/")+"\")'>":"")+breadcrumbs[i]+(i<(z-2)?"</a>":""));
+            }
+            $("<p class='ftps3-path'><a href='#' onclick='$.ftps3().getKeys(\"/\")'><i class='fa fa-home'></i></a> <i class='fa fa-angle-right'></i> "+breadcrumbs_items.join(" <i class='fa fa-angle-right'></i> ")+"</p>").appendTo(explorer);
+        }else{
+            $("<p class='ftps3-path'><i class='fa fa-home'></i></p>").appendTo(explorer);
         }
 
         if(!isRoot){
@@ -234,6 +249,9 @@
             crossDomain: true,
             contentType: 'application/json',
             error: function(e) {
+                if(e.status===401){
+                    window.location.reload();
+                }
             },       
             success: function(data){
                 settings.signedFormData = data;
@@ -250,7 +268,6 @@
         for(var k in settings.signedFormData){
             if(["endpoint"].indexOf(k)===-1){
                 if(k==="key"){
-                    console.log(settings.signedFormData[k].replace("/","/"+path))
                     fd.append(k, settings.signedFormData[k].replace("/","/"+path));
                 }else{
                     fd.append(k, settings.signedFormData[k]);
@@ -277,7 +294,6 @@
     }      
  
     var uploadData = function(file, path){
-        console.log(JSON.stringify(file) + " " + path)
         if(!settings.signedFormData){
             _getUploadForm(function(){_generateFormData(_ajaxUploadPost,file,path)});
         }else{
@@ -306,6 +322,9 @@
             contentType: 'application/json',
             data: JSON.stringify({"keys" : keys}),
             error: function(e) {
+                if(e.status===401){
+                    window.location.reload();
+                }
             },       
             success: function(data){
                 if(data.message==="done"){
