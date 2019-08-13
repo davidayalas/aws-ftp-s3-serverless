@@ -12,7 +12,22 @@
             border: 1px solid #ddd;
             margin-bottom: 1em;
         }
-        
+        #browser-toc{
+            width: 100%;
+        }
+
+        #browser-toc tr{
+            line-height: 1.5em;
+            width:100%;
+        }
+
+        #browser-toc td.ftps3-item-filename{
+            width: 50%;
+        }
+
+        #browser-toc td.ftps3-item-date, #browser-toc td.ftps3-item-size{
+            width: 25%;
+        }        
     </style>
 </head>
 
@@ -44,13 +59,14 @@
 
                 </div>
 
-                <form id="upload" method="post" enctype="multipart/form-data">
-                    <!--input type="submit" name="submit" value="Envia" /-->
-                    <!-- Drag and Drop container-->
-                    <div class="upload-area" id="uploadfiledrag">
-                        <h1>Arrosega o clica per a seleccionar</h1>
-                    </div>                            
-                </form>
+                <div class="upload-area" id="uploadfiledrag">
+                    <h1>Arrosega o clica per a seleccionar</h1>
+                </div>
+
+                <div class="log-area">
+                    
+                </div>
+    
             </div>
             
 

@@ -24,7 +24,8 @@
                 key_root : "",
                 browser_selector: ""
                 uploadarea_selector: "",
-                uploadarea_message_selector: ""
+                uploadarea_message_selector: "",
+                logarea_selector : "",
                 messages: {
                     "dragover_html" : "Drag here",
                     "dragenter" : "Drop",
@@ -204,14 +205,15 @@
             e.stopPropagation();
             e.preventDefault();
             $(settings.uploadarea_message_selector).text(settings.messages.ondrop);
+            //$(settings.logarea_selector).html("");
             //var file = e.originalEvent.dataTransfer.files;
             var items = event.dataTransfer.items;
             for (var i=0; i<items.length; i++) {
-            // webkitGetAsEntry is where the magic happens
-            var item = items[i].webkitGetAsEntry();
-            if (item) {
-                _traverseFileTree(item);
-            }
+                // webkitGetAsEntry is where the magic happens
+                var item = items[i].webkitGetAsEntry();
+                if (item) {
+                    _traverseFileTree(item);
+                }
             } 
         });
 
@@ -226,7 +228,7 @@
         $("#ftps3_uploadfile").change(function(){
             var items = $('#ftps3_uploadfile')[0].files;
             for (var i=0; i<items.length; i++) {
-            uploadData(items[i], items[i].webkitRelativePath.replace(items[i].name,""));
+                uploadData(items[i], items[i].webkitRelativePath.replace(items[i].name,""));
             } 
         });
     }
@@ -289,6 +291,9 @@
             }
         }
         fd.append('file', file);
+        if(settings.logarea_selector){
+            $("<p><span class='ftps3-upload-log-"+file.name.replace(/\./g,"-")+"'>Uploading </span> " + path + file.name + "</p>").prependTo($(settings.logarea_selector));
+        }
         _fnUpload(fd);
     }
     
@@ -302,6 +307,9 @@
             dataType: 'json',
             contentType: false,
             success: function(response){
+                if(settings.logarea_selector){
+                    $(".ftps3-upload-log-"+formdata.get("file").name.replace(/\./g,"-")).html("Uploaded");
+                }
                 $(settings.uploadarea_message_selector).text(settings.messages.onfinish);
             }
         });
@@ -342,6 +350,7 @@
             },       
             success: function(data){
                 if(data.message==="done"){
+                    $(".ftps3-delete-log-item").html("Deleted");
                     _getKeys(settings.currentDir);
                 }
             } 
@@ -354,6 +363,10 @@
             var keys = [];
             $(settings.browser_selector + " input.ftps3-todelete:checked").each(function(item){
                 keys.push(this.value);
+                if(settings.logarea_selector){
+                    $("<p><span class='ftps3-delete-log-item'>Deleting</span> " + this.value + "</p>").prependTo($(settings.logarea_selector));
+                }
+
             });
             _deleteKeys(keys)
         }
