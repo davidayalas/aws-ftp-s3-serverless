@@ -14,7 +14,8 @@
 
     var settings = {};
     var explorer = null;
-    var uploadcounter = 0;
+    var queue = [];
+    var counter = 0;
 
     $.ftps3 = function(options) {
         /*
@@ -61,16 +62,20 @@
             deleteKeys : function(){_deleteAll();},
             createFolder : function(){_createFolderInput();},
             getExplorer : function(){return explorer;},
-            uploadcounter :  {
-                get : function(){
-                    return uploadcounter;
+            uploadqueue : {
+                push : function(item){
+                    queue.push(item);
                 },
-                set : function(uc){
-                    uploadcounter = uc;
+                length : function(){
+                    return queue.length;
                 },
-                add : function(_add){
-                    $.ftps3().uploadcounter.set($.ftps3().uploadcounter.get()+_add);
+                process: function(){
+                    _processQueue();
+                },
+                getItem: function(){
+                    return queue.shift();
                 }
+                
             }
        }
     }
@@ -226,7 +231,7 @@
             //$(settings.logarea_selector).html("");
             //var file = e.originalEvent.dataTransfer.files;
             var items = event.dataTransfer.items;
-            $.ftps3().uploadcounter.set(0);
+            counter=0;
             for (var i=0; i<items.length; i++) {
                 // webkitGetAsEntry is where the magic happens
                 var item = items[i].webkitGetAsEntry();
@@ -252,22 +257,47 @@
         });
     }
 
+    var _processUploadQueue = function() {
+        var item = $.ftps3().uploadqueue.getItem();
+        if(!item){
+            _getKeys("",true);
+            return;
+        }
+        uploadData(item[0], item[1], function(){
+            _processUploadQueue()
+        });
+    }
+
     var _traverseFileTree = function(item, path) {
         path = path || "";
         if (item.isFile) {
           // Get and upload file
-          $.ftps3().uploadcounter.add(1);
+          counter++;
           item.file(function(file) {
-            uploadData(file, path);
+            //uploadData(file, path);
+            $.ftps3().uploadqueue.push([file, path]);
+            counter--;
+            if(counter===0){
+                _processUploadQueue();
+                _processUploadQueue();
+            }
           });
+        
         } else if (item.isDirectory) {
           // Get folder contents
           var dirReader = item.createReader();
-          dirReader.readEntries(function(entries) {
-            for (var i=0; i<entries.length; i++) {
-                _traverseFileTree(entries[i], path + item.name + "/");
-            }
-          });
+
+          var readEntries = function(){
+            dirReader.readEntries(function(entries) {
+                if(entries.length===100){ //limit for call
+                    readEntries();
+                }
+                for (var i=0; i<entries.length; i++) {
+                    _traverseFileTree(entries[i], path + item.name + "/");
+              }
+            });
+          }
+          readEntries();
         }
       }
 
@@ -305,7 +335,7 @@
         ;
     }
 
-    var _generateFormData = function(_fnUpload, file, path){
+    var _generateFormData = function(_fnUpload, file, path, cb){
         path = settings.currentDir + path;
         var fd = new FormData();
         for(var k in settings.signedFormData){
@@ -321,10 +351,10 @@
         if(settings.logarea_selector){
             $("<p><span class='ftps3-upload-log-"+cleanName(file.name)+"'>Uploading </span> " + path + file.name + "</p>").prependTo($(settings.logarea_selector));
         }
-        _fnUpload(fd);
+        _fnUpload(fd, cb);
     }
     
-    var _ajaxUploadPost = function(formdata){
+    var _ajaxUploadPost = function(formdata, cb){
         $(settings.uploadarea_message_selector).text(settings.messages.onuploading);
         $.ajax({
             url: settings.signedFormData.endpoint,
@@ -334,23 +364,20 @@
             dataType: 'json',
             contentType: false,
             success: function(response){
-                $.ftps3().uploadcounter.add(-1);
                 if(settings.logarea_selector){
                     $(".ftps3-upload-log-"+cleanName(formdata.get("file").name)).html("Uploaded");
                 }
                 $(settings.uploadarea_message_selector).text(settings.messages.onfinish);
-                if($.ftps3().uploadcounter.get()===0){
-                    $.ftps3().getKeys("", true);
-                }
+                cb();
             }
         });
     }      
  
-    var uploadData = function(file, path){
+    var uploadData = function(file, path, cb){
         if(!settings.signedFormData){
-            _getUploadForm(function(){_generateFormData(_ajaxUploadPost,file,path)});
+            _getUploadForm(function(){_generateFormData(_ajaxUploadPost,file,path,cb)});
         }else{
-            _generateFormData(_ajaxUploadPost,file,path);
+            _generateFormData(_ajaxUploadPost,file,path,cb);
         }
     }
 
