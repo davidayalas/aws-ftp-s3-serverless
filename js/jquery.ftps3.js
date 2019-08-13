@@ -104,10 +104,24 @@
         });
     }
 
+    var _bytesToSize = function(bytes) {
+        var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        if (bytes == 0) return '0 Byte';
+        var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+        return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+    };
+
+    var _getDate = function(_date){
+        _date = new Date(_date);
+        return ('0' + _date.getDate()).slice(-2) + "/" + ('0'+(_date.getMonth()+1)).slice(-2) +  "/" + _date.getFullYear() + " - " + ('0' + _date.getHours()).slice(-2) + ":" + ('0' + _date.getMinutes()).slice(-2);
+    }
+
     var _drawExplorer = function(data){
         var explorer = $(settings.browser_selector);
         $(explorer).html("");
-    
+        $("<table id='"+settings.browser_selector.slice(1)+"-toc'></table>").appendTo(explorer);
+
+        var toc = $(settings.browser_selector+"-toc");
         var keyRoot = settings.key_root; //to remove due our interaction with our lambdas
         var aux;
     
@@ -117,10 +131,8 @@
         parent = parent.slice(0,parent.lastIndexOf("/")).replace(keyRoot,"").replace("/","");
     
         settings.currentDir = data.Prefix.replace(keyRoot+"/","");
-        var currentPath = "";
 
         if(settings.currentDir!==""){
-            console.log(settings.currentDir.split("/"))
             var breadcrumbs = settings.currentDir.split("/");
             var breadcrumbs_items = [];
             var breadcrumbs_path=[];
@@ -131,28 +143,30 @@
                 breadcrumbs_path.push(breadcrumbs[i]);
                 breadcrumbs_items.push((i<(z-2)?" <a href='#' onclick='$.ftps3().getKeys(\""+breadcrumbs_path.join("/")+"\")'>":"")+breadcrumbs[i]+(i<(z-2)?"</a>":""));
             }
-            $("<p class='ftps3-path'><a href='#' onclick='$.ftps3().getKeys(\"/\")'><i class='fa fa-home'></i></a> <i class='fa fa-angle-right'></i> "+breadcrumbs_items.join(" <i class='fa fa-angle-right'></i> ")+"</p>").appendTo(explorer);
+            $("<tr><td class='ftps3-path' colspan='2'><a href='#' onclick='$.ftps3().getKeys(\"/\")'><i class='fa fa-home'></i></a> <i class='fa fa-angle-right'></i> "+breadcrumbs_items.join(" <i class='fa fa-angle-right'></i> ")+"</td></tr>").appendTo(toc);
         }else{
-            $("<p class='ftps3-path'><i class='fa fa-home'></i></p>").appendTo(explorer);
+            $("<tr><td class='ftps3-path' colspan='2'><i class='fa fa-home'></i></td></tr>").appendTo(toc);
         }
 
         if(!isRoot){
-            $("<p class='ftps3-parent-folder'><i class='fa fa-folder' aria-hidden='true'></i> <a href='#' onclick='$.ftps3().getKeys(\""+parent+"\")'>..</a></p>").appendTo(explorer);
+            $("<tr><td class='ftps3-parent-folder' colspan='2'><i class='fa fa-folder' aria-hidden='true'></i> <a href='#' onclick='$.ftps3().getKeys(\""+parent+"\")'>..</a></td></tr>").appendTo(toc);
         }
     
+        var currentPath = "";
         for(var i=0,z=data.CommonPrefixes.length;i<z;i++){
             aux = data.CommonPrefixes[i].Prefix.replace(data.Prefix,"");
             if(aux.slice(-1)==="/"){
                 aux = aux.slice(0,aux.length-1);
             }
             currentPath = data.CommonPrefixes[i].Prefix.replace(keyRoot+"/","");
-            $("<p class='ftps3-item-folder'><input type='checkbox' value='"+currentPath+"' class='ftps3-todelete' /> <i class='fa fa-folder' aria-hidden='true'></i> <a href='#' onclick='$.ftps3().getKeys(\""+settings.currentDir+aux+"\")'>" + aux + "</a></p>").appendTo(explorer);
+            $("<tr class='ftps3-item-folder'><td colspan='2'><input type='checkbox' value='"+currentPath+"' class='ftps3-todelete' /> <i class='fa fa-folder' aria-hidden='true'></i> <a href='#' onclick='$.ftps3().getKeys(\""+settings.currentDir+aux+"\")'>" + aux + "</a></td></tr>").appendTo(toc);
         }
     
+        var _date;
         for(var i=0,z=data.Contents.length;i<z;i++){
             aux = data.Contents[i].Key.slice(data.Contents[i].Key.lastIndexOf("/")+1);
             if(aux!==""){
-                $("<p class='ftps3-item-file'><input type='checkbox' class='ftps3-todelete' value='"+data.Contents[i].Key.replace(keyRoot+"/","")+"'/> <i class='fa fa-file' aria-hidden='true'></i> " + aux + "</p>").appendTo(explorer);
+                $("<tr class='ftps3-item-file'><td class='ftps3-item-filename'><input type='checkbox' class='ftps3-todelete' value='"+data.Contents[i].Key.replace(keyRoot+"/","") + "'/> <i class='fa fa-file' aria-hidden='true'></i> " + aux + "</td><td class='ftps3-item-filesize'>"+ _bytesToSize(data.Contents[i].Size) +"</td><td class='ftps3-item-date'>"+_getDate(data.Contents[i].LastModified)+"</td></tr>").appendTo(toc);
             }
         }    
     }
