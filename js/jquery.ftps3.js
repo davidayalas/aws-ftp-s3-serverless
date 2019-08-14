@@ -1,6 +1,6 @@
 /*!
  * jQuery plugin to encapsulate "FTP Serverless" functionality.
- * Original authors: @davidayalas @asamo7
+ * Original authors: @davidayalas & @asamo7
  * Licensed under the MIT license
  */
 
@@ -17,6 +17,9 @@
     var queue = [];
     var queue_counter = 0;
 
+    /*
+    * Upload queue management
+    */
     var uploadqueue = {
         push : function(item){
             queue.push(item);
@@ -101,6 +104,38 @@
     }
 
     /*
+    * Common request ajax wrapper
+    */
+    var _request = function(method, endpoint, callback, body, _opts, signedRequest){
+        var options = {
+            "type": method, 
+            "url": endpoint,
+            "headers": {
+                "Authorization": settings.auth_token
+            },     
+            "dataType": 'json',
+            "crossDomain": true,
+            "contentType": 'application/json',
+            "error": function(e) {
+                if(e.status===401){
+                    window.location.reload();
+                }
+            },       
+            "success": function(data){
+                if(typeof callback==="function"){callback(data);}
+            }
+        };
+        if(body){options.data = body;}
+        if(_opts){
+            for(var k in _opts){
+                options[k] = _opts[k];
+            }
+        }
+        if(signedRequest){delete options.headers["Authorization"];}
+        $.ajax(options);
+    }
+
+    /*
     * Create a folder in route
     */
     var _createFolderInput = function(){
@@ -130,24 +165,8 @@
     
         // TODO param continuationToken is available on lambda endpoint
 
-        $.ajax({
-            type: "GET", 
-            url: settings.endpoint_browse+querystring,
-            headers: {
-                "Authorization": settings.auth_token
-            },     
-            dataType: 'json',
-            crossDomain: true,
-            withCredentials: true,
-            contentType: 'application/json',
-            error: function(e) {
-                if(e.status===401){
-                    window.location.reload();
-                }
-            },       
-            success: function(data){
-                _drawExplorer(data);            
-            } 
+        _request("GET", settings.endpoint_browse+querystring, function(data){
+            _drawExplorer(data);            
         });
     }
 
@@ -312,7 +331,7 @@
           item.file(function(file) {
             uploadqueue.push([file, path]);
             if(((uploadqueue.length() % 100)===0 && uploadqueue.startNewQueue()) || uploadqueue.queuesLength()===0){
-                uploadqueue.process(1);
+                uploadqueue.process(1); //add a queue process until "max_upload_threads"
             }
           });
         
@@ -331,32 +350,17 @@
           }
           readEntries();
         }
-      }
+    }
 
-      /*
-      * Gets upload signed data from backend --> https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-post-example.html
-      */
-      var _getUploadForm = function(callback){
-        $.ajax({
-            type: "GET", 
-            url: settings.endpoint_signedform + "?success_redirect=",
-            headers: {
-                "Authorization": settings.auth_token
-            },   
-            dataType: 'json',
-            crossDomain: true,
-            contentType: 'application/json',
-            error: function(e) {
-                if(e.status===401){
-                    window.location.reload();
-                }
-            },       
-            success: function(data){
-                settings.signedFormData = data;
-                if(typeof callback==="function"){
-                    callback();
-                }
-            } 
+    /*
+    * Gets upload signed data from backend --> https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-post-example.html
+    */
+    var _getUploadForm = function(callback){
+        _request("GET", settings.endpoint_signedform + "?success_redirect=", function(data){
+            settings.signedFormData = data;
+            if(typeof callback==="function"){
+                callback();
+            }
         });
     }
     
@@ -397,21 +401,13 @@
     */
     var _ajaxUploadPost = function(formdata, cb){
         $(settings.uploadarea_message_selector).text(settings.messages.onuploading);
-        $.ajax({
-            url: settings.signedFormData.endpoint,
-            type: 'POST',
-            data: formdata,
-            processData: false,
-            dataType: 'json',
-            contentType: false,
-            success: function(response){
-                if(settings.logarea_selector){
-                    $(".ftps3-upload-log-"+cleanName(formdata.get("file").name)).html("Uploaded");
-                }
-                $(settings.uploadarea_message_selector).text(settings.messages.onfinish);
-                cb();
+        _request("POST", settings.signedFormData.endpoint, function(response){
+            if(settings.logarea_selector){
+                $(".ftps3-upload-log-"+cleanName(formdata.get("file").name)).html("Uploaded");
             }
-        });
+            $(settings.uploadarea_message_selector).text(settings.messages.onfinish);
+            cb();
+        }, formdata, {processData:false,contentType:false}, true);
     }      
  
     var uploadData = function(file, path, cb){
@@ -428,32 +424,13 @@
     * POST better than DELETE because we need send body
     */
     var _deleteKeys = function(keys){
-        if(!keys){
-            return;
-        }
-        $.ajax({
-            type: "POST", 
-            url: settings.endpoint_delete,
-            headers: {
-                "Authorization": settings.auth_token
-            },     
-            dataType: 'json',
-            crossDomain: true,
-            withCredentials: true,
-            contentType: 'application/json',
-            data: JSON.stringify({"keys" : keys}),
-            error: function(e) {
-                if(e.status===401){
-                    window.location.reload();
-                }
-            },       
-            success: function(data){
-                if(data.message==="done"){
-                    $(".ftps3-delete-log-item").html("Deleted");
-                    _getKeys(settings.currentDir);
-                }
-            } 
-        });
+        if(!keys){return;}
+        _request("POST", settings.endpoint_delete, function(data){
+            if(data.message==="done"){
+                $(".ftps3-delete-log-item").html("Deleted");
+                _getKeys(settings.currentDir);
+            }
+        }, JSON.stringify({"keys" : keys}));
     }
     
 
