@@ -77,7 +77,8 @@ function showName(){
             logarea_selector: ".log-area",
             max_upload_threads: 40,
             messages : {
-                "ondelete" : "Segur que vols eliminar els fitxers?"
+                "ondelete" : "Segur que vols eliminar els fitxers?",
+                "dragarea" : "Arrossega o clica per a seleccionar"
             }
         }).getKeys();
 

@@ -65,6 +65,7 @@
                 max_upload_threads : 10,
                 messages: {
                     "dragover_html" : "Drag here",
+                    "dragarea" : "Drag file/folder or click",
                     "dragenter" : "Drop",
                     "dragover_uploadarea" : "Drop",
                     "ondrop" : "Upload",
@@ -80,6 +81,7 @@
             max_upload_threads : 10,
             messages: {
                 "dragover_html" : "Drag here",
+                "dragarea" : "Drag file/folder or click",
                 "dragenter" : "Drop",
                 "dragover_uploadarea" : "Drop",
                 "ondrop" : "Upload",
@@ -313,6 +315,7 @@
         var item = uploadqueue.getItem();
         if(!item){
             uploadqueue.queuesLength(true);
+            $(settings.uploadarea_message_selector).text(settings.messages.dragarea);
             _getKeys("",true);
             return;
         }
