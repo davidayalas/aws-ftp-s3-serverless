@@ -72,7 +72,9 @@
                     "onuploading" : "Uploading...",
                     "onfinish" : "Uploaded!",
                     "ondelete" : "Are you sure you want to delete key/s?"
-                }
+                },
+                initActionHook : function(){},
+                endActionHook : function(){}
             }
         
         */
@@ -90,10 +92,25 @@
                 "ondelete" : "Are you sure you want to delete key/s?",
                 "folder_prompt" : "Folder name?",
                 "folder_prompt_value" : "folder"
-            }               
+            },
+            initActionHook : function(){},
+            endActionHook : function(){}                          
            }, options);
 
            explorer = $(settings.browser_selector);
+
+           if(settings.initActionHook && typeof settings.initActionHook==="function"){
+               settings.loading = function(){
+                  settings.initActionHook();
+               };
+           }
+
+           if(settings.endActionHook && typeof settings.endActionHook==="function"){
+            settings.endLoading = function(){
+               settings.endActionHook();
+            };
+        }
+
        }
 
        return {
@@ -167,8 +184,11 @@
     
         // TODO param continuationToken is available on lambda endpoint
 
+        settings.loading();
+
         _request("GET", settings.endpoint_browse+querystring, function(data){
             _drawExplorer(data);            
+            settings.endLoading();
         });
     }
 
@@ -286,6 +306,7 @@
             e.preventDefault();
             $(settings.uploadarea_message_selector).text(settings.messages.ondrop);
             var items = event.dataTransfer.items;
+            settings.loading();            
             for (var i=0; i<items.length; i++) {
                 var item = items[i].webkitGetAsEntry();
                 if (item) {
@@ -443,6 +464,7 @@
     var _deleteAll = function(){
         var message=settings.messages.ondelete;
         if($(settings.browser_selector + " input.ftps3-todelete:checked").length>0 && window.confirm(message)){
+            settings.loading(); 
             var keys = [];
             $(settings.browser_selector + " input.ftps3-todelete:checked").each(function(item){
                 keys.push(this.value);

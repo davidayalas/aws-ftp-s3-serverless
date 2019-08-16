@@ -79,6 +79,12 @@ function showName(){
             messages : {
                 "ondelete" : "Segur que vols eliminar els fitxers?",
                 "dragarea" : "Arrossega o clica per a seleccionar"
+            },
+            initActionHook : function(){
+                $("#loader").addClass("loading").css("display","block");
+            },
+            endActionHook : function(){
+                $("#loader").removeClass("loading").css("display","none");
             }
         }).getKeys();
 
