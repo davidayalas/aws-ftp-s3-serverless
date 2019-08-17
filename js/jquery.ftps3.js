@@ -275,8 +275,8 @@
     var _setUpload = function(){
 
         // creates input file type
-        $('<label class="ftps3_uploadinput" for="ftps3_uploadfile" style="display:none" >Upload file/s<input type="file" name="file" id="ftps3_uploadfile" multiple style="display:none" /></label>').insertBefore($(settings.uploadarea_selector));
-        $('<label class="ftps3_uploadinput" for="ftps3_uploadfolder" style="display:none" >Upload folder/s<input type="file" name="file" id="ftps3_uploadfolder" webkitdirectory multiple style="display:none" /></label>').insertBefore($(settings.uploadarea_selector));
+        $('<label class="ftps3_uploadinput ftps3_uploadinputfile" for="ftps3_uploadfile" style="display:none" >Upload file/s<input type="file" name="file" id="ftps3_uploadfile" multiple style="display:none" /></label>').insertBefore($(settings.uploadarea_selector));
+        $('<label class="ftps3_uploadinput ftps3_uploadinputfolder" for="ftps3_uploadfolder" style="display:none" >Upload folder/s<input type="file" name="file" id="ftps3_uploadfolder" webkitdirectory multiple style="display:none" /></label>').insertBefore($(settings.uploadarea_selector));
 
         // preventing page from redirecting
         $("html").on("dragover", function(e) {

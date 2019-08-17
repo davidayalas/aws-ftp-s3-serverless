@@ -271,7 +271,7 @@ box-shadow: rgba(255,255,255, 0.75) 1.5em 0 0 0, rgba(255,255,255, 0.75) 1.1em 1
   #browser-toc td.ftps3-item-date, #browser-toc td.ftps3-item-filesize{
     display: none;
   }
-  .ftps3_uploadinput{
+  .ftps3_uploadinputfile{
     display: block!important;
   }
   .upload-area{
