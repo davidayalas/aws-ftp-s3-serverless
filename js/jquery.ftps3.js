@@ -275,7 +275,8 @@
     var _setUpload = function(){
 
         // creates input file type
-        $('<input type="file" name="file" id="ftps3_uploadfile" multiple style="display:none" />').appendTo($(settings.uploadarea_selector).parent());
+        $('<label class="ftps3_uploadinput" for="ftps3_uploadfile" style="display:none" >Upload file/s<input type="file" name="file" id="ftps3_uploadfile" multiple style="display:none" /></label>').insertBefore($(settings.uploadarea_selector));
+        $('<label class="ftps3_uploadinput" for="ftps3_uploadfolder" style="display:none" >Upload folder/s<input type="file" name="file" id="ftps3_uploadfolder" webkitdirectory multiple style="display:none" /></label>').insertBefore($(settings.uploadarea_selector));
 
         // preventing page from redirecting
         $("html").on("dragover", function(e) {
@@ -320,12 +321,25 @@
             $("#ftps3_uploadfile").click();
         });
 
+
+        // Aux function
+        var processFilesFolders = function(items){
+            for (var i=0; i<items.length; i++) {
+                uploadqueue.push([items[i], items[i].webkitRelativePath.replace(items[i].name,"")]);
+            } 
+            uploadqueue.process(1);
+        }
+
         // file selected
         $("#ftps3_uploadfile").change(function(){
-            var items = $('#ftps3_uploadfile')[0].files;
-            for (var i=0; i<items.length; i++) {
-                uploadData(items[i], items[i].webkitRelativePath.replace(items[i].name,""));
-            } 
+            settings.loading();
+            processFilesFolders($('#ftps3_uploadfile')[0].files);
+        });
+
+        // folder selected
+        $("#ftps3_uploadfolder").change(function(){
+            settings.loading();
+            processFilesFolders($('#ftps3_uploadfolder')[0].files);
         });
     }
 
