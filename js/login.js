@@ -1,6 +1,58 @@
 var LoginWindow;
 var logindomain = "https://2azu9l48b1.execute-api.eu-west-1.amazonaws.com"
 
+var _$ = function(_element){
+    var element = null;
+    var xhr = null;
+
+    var myDOM = {
+        get : function(el){
+            if(element) return element;
+            return document.querySelectorAll(el);
+        },
+        addCss : function(style, value){
+            [].forEach.call(element, function(el) {
+                el.style[style] = value; // or add a class
+            })
+            return this;
+        },
+        removeClass : function(className){
+            element.forEach(function(item){
+                item.classList.remove(className);
+            });
+            return this;
+        },
+        addClass : function(className){
+            element.forEach(function(item){
+                item.classList.add(className);
+            });
+            return this;
+        },
+        text : function(str){
+            [].forEach.call(element, function(el) {
+                el.textContent = str;
+            });
+            return this;
+        },        
+        on : function(eventName, eventHandler){
+            Array.prototype.forEach.call(element, function (item) {
+                item.addEventListener(eventName, eventHandler);
+            });
+            return this;
+        },
+        ready : function(fn){
+            if (document.readyState != 'loading'){
+                fn();
+            } else {
+                document.addEventListener('DOMContentLoaded', fn);
+            }
+        }
+    }
+
+    element = myDOM.get(_element);
+    return myDOM;
+}
+
 function decoder(base64url) {
     try {
         var base64 = base64url.replace('-', '+').replace('_', '/')
@@ -43,8 +95,8 @@ function Login(title, w, h){
     }  
 }
 
-$(document).ready(function(){
-    $("#login").on("click", function(){
+_$().ready(function(){
+    _$("#login").on("click", function(){
         Login("login",430,430);
         return false;
     });
@@ -57,15 +109,15 @@ function showName(){
     if((+new Date()/1000)>token_ttl){
         window.localStorage.removeItem("token");
         window.localStorage.removeItem("token_ttl");
-        $("#login_container").css("display","block");
-        $("#browser_container").css("display","none");
+        _$("#login_container").addCss("display","block");
+        _$("#browser_container").addCss("display","none");
     }else{
-        $("#login_container").css("display","none");
-        $("#browser_container").css("display","block");
-        $("#browser_container h2").text("Hola " + window.localStorage.getItem("token_name"));
+        _$("#login_container").addCss("display","none");
+        _$("#browser_container").addCss("display","block");
+        _$("#browser_container h2").text("Hola " + window.localStorage.getItem("token_name"));
         //getUploadForm();
 
-        $.ftps3({
+        /*$.ftps3({
             endpoint_signedform : "https://favyoweaj6.execute-api.eu-west-1.amazonaws.com/dev/getuploadform",
             endpoint_browse : "https://favyoweaj6.execute-api.eu-west-1.amazonaws.com/dev/getfiles",
             endpoint_delete : "https://favyoweaj6.execute-api.eu-west-1.amazonaws.com/dev/deletekeys",
@@ -88,6 +140,31 @@ function showName(){
             }
         }).getKeys();
 
-        $.ftps3().setUpload();
+        $.ftps3().setUpload();*/
+
+        ftps3({
+            endpoint_signedform : "https://favyoweaj6.execute-api.eu-west-1.amazonaws.com/dev/getuploadform",
+            endpoint_browse : "https://favyoweaj6.execute-api.eu-west-1.amazonaws.com/dev/getfiles",
+            endpoint_delete : "https://favyoweaj6.execute-api.eu-west-1.amazonaws.com/dev/deletekeys",
+            auth_token : window.localStorage.getItem("token"),
+            key_root : window.localStorage.getItem("token_email"),
+            browser_selector: "#browser",
+            uploadarea_selector: ".upload-area",
+            uploadarea_message_selector: ".upload-area h1",
+            logarea_selector: ".log-area",
+            max_upload_threads: 40,
+            messages : {
+                "ondelete" : "Segur que vols eliminar els fitxers?",
+                "dragarea" : "Arrossega o clica per a seleccionar"
+            },
+            initActionHook : function(){
+                _$("#loader").addClass("loading").addCss("display","block");
+            },
+            endActionHook : function(){
+                _$("#loader").removeClass("loading").addCss("display","none");
+            }
+        });
+        ftps3().getKeys();
+        ftps3().setUpload();
     }
 }

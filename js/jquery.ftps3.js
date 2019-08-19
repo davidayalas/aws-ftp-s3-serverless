@@ -1,5 +1,5 @@
 /*!
- * jQuery plugin to encapsulate "FTP Serverless" functionality.
+ * jQuery/Zepto plugin to encapsulate "FTP Serverless" functionality.
  * Original authors: @davidayalas & @asamo7
  * Licensed under the MIT license
  */
@@ -490,4 +490,4 @@
             _deleteKeys(keys)
         }
     }
-}(jQuery));
+}(JQuery));
