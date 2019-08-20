@@ -65,6 +65,40 @@
     var queue_counter = 0;
     var xhr = null;
 
+    window.ftps3 = function(options) {
+        if(!settings.auth_token){
+            for(var k in options){
+                if(typeof options[k]==="object"){
+                    for(var z in options[k]){
+                        settings[k][z] = options[k][z];
+                    }
+                }else{
+                settings[k] = options[k];
+                }
+            }
+            explorer = _$(settings.browser_selector);
+
+            if(settings.initActionHook && typeof settings.initActionHook==="function"){
+                settings.loading = function(){
+                    settings.initActionHook();
+                };
+            }
+
+            if(settings.endActionHook && typeof settings.endActionHook==="function"){
+                settings.endLoading = function(){
+                    settings.endActionHook();
+                };
+            }
+        }
+        return {
+            getKeys : function(path, refresh){_getKeys(path, refresh);},
+            setUpload : function(){_setUpload();},
+            deleteKeys : function(){_deleteAll();},
+            createFolder : function(){_createFolderInput();},
+            getExplorer : function(){return explorer;},
+        }
+    }
+
     /*
     * Upload queue management
     */
@@ -97,41 +131,6 @@
             return queue.shift();
         }
     }    
-
-    ftps3 = function(options) {
-        if(!settings.auth_token){
-            for(var k in options){
-                if(typeof options[k]==="object"){
-                    for(var z in options[k]){
-                        settings[k][z] = options[k][z];
-                    }
-                }else{
-                settings[k] = options[k];
-                }
-            }
-            explorer = _$(settings.browser_selector);
-
-            if(settings.initActionHook && typeof settings.initActionHook==="function"){
-                settings.loading = function(){
-                    settings.initActionHook();
-                };
-            }
-
-            if(settings.endActionHook && typeof settings.endActionHook==="function"){
-                settings.endLoading = function(){
-                    settings.endActionHook();
-                };
-            }
-        }
-
-        return {
-            getKeys : function(path, refresh){_getKeys(path, refresh);},
-            setUpload : function(){_setUpload();},
-            deleteKeys : function(){_deleteAll();},
-            createFolder : function(){_createFolderInput();},
-            getExplorer : function(){return explorer;},
-        }
-    }
 
     var _$ = function(_element){
         var element = null;
