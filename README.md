@@ -1,33 +1,75 @@
-# PoC FTP Serverless
+# PoC AWS FTP S3 Serverless
 
-## Context
+The goal of this project is to provide a space for users under a AWS S3 bucket (shared S3 bucket with a "folder" for every user), with a web interface to upload, browse and remove files.
 
-L'objectiu és crear un símil d'un servei FTP per a usuaris, on cada usuari tingui accés a una part del "disc". Per a fer-ho, una de les millors opcions és utilitzar les tencologies serverless d'AWS (Lambda) sobre S3:
+Features:
 
-- La transferència de fitxers és directa des del navegador a S3
-- Per a les funcions que requereixen altres tipus d'interacció > lògica a AWS Lambda
+* Each user only sees its "folder" under S3 bucket. The folder is its "id" from OAuth or SAML
+    - In our PoC, it works with SAML-JWT deployed as a lambda (https://github.com/davidayalas/saml-jwt)
+    - You need a Custom Authorizer for your API Gateway to validate JWT Token. Sample here: https://yos.io/2017/09/03/serverless-authentication-with-jwt/
 
-L'autenticació es pot fer mitjançant OAuth o SAML. Aquest projecte utilitza SAML (veure [login.js](js/login.js)) per a autenticar i genera un token JWT que s'utilitza al Custom Authorizer de AWS API Gateway per a deixar passar o no les crides. Es un muntatge comú per a d'altres proves. El que cal és tenir un token i un identificador únic de l'usuari per a poder tenir una estructura del tipus /aws-bucket/id-user.
+* User can upload folders (drag and drop) and the structure is recreated in S3
+
+* Folders can be deleted (included not empty)
+
+* Folder creation
+
+## Sample interface
+
+![screen](docs/screen-1.png)
+![screen while uploading](docs/screen-2.png)
+
+## Lambdas
+
+1. Form signing for upload > [lambda/form-signing/index.js](lambda/form-signing/index.js) This lambda generates the signature for valid uploads. 
+
+1. Browing > [lambda/browsing/index.js](lambda/browsing/index.js) This lambda retrieves the objects in a path
+
+1. Delete > [lambda/delete-keys/index.js](lambda/delete-keys/index.js) This lambda deletes recursively all objects in a path
+
+## API GW 
+
+* These lambdas have to be exposed througth AWS API GW. 
+* The custom authorizer has to include a {user : "id"} in the request context in order to get it in the previous lambdas to target the user folder: event.requestContext.authorizer.user
+* Enable CORS: https://serverless.com/blog/cors-api-gateway-survival-guide/
+* Remember the "Gateway responses" then custom authorizer in use.
 
 
-## Lambda
+## Setup interface
 
-* Al directori "/lambda" estan les funcions de backend:
+Include [js/ftps3.js](js/ftps3.js) in your html.
 
-- [form-signing](lambda/form-signing/index.js): permet obtenir les dades d'un formulari per a fer POST d'objectes directament a AWS
-- [browsing](lambda/browsing/index.js): a partir d'un path donat retorna les keys sota seu
-- [delete-keys](lambda/delete-keys/index.js): a partir d'unes keys donades, elimina recursivament si és un "folder" o la key si és un "file"
+    ftps3({
+        endpoint_signedform : "your lambda or endpoint",
+        endpoint_browse : "your lambda or endpoint",
+        endpoint_delete : "your lambda or endpoint",
+        auth_token : "auth token to validate againt api gw custom authorizer",
+        key_root : "in a bucket shared for some users, 'user key'",
+        
+        browser_selector: "#browser"
+        uploadarea_selector: "#upload-area",
+        uploadarea_message_selector: "#upload-area-message",
+        logarea_selector : "#log-area",
+        max_upload_threads : 10, //to process internal queue quickly
+        messages: {
+            "dragover_html" : "Drag here",
+            "dragarea" : "Drag file/folder or click",
+            "dragenter" : "Drop",
+            "dragover_uploadarea" : "Drop",
+            "ondrop" : "Upload",
+            "onuploading" : "Uploading...",
+            "onfinish" : "Uploaded!",
+            "ondelete" : "Are you sure you want to delete key/s?"
+        },
+        initActionHook : function(){},
+        endActionHook : function(){}
+    });
 
-## Interfície web
+    ftps3().getKeys();
+    ftps3().setUpload();
 
-* Hem creat un plugin de JQuery per a encapsular la lògica del client "FTP Serverless" [js/jquery.ftps3.js](js/jquery.ftps3.js)
-* La resta (css, fonts, icons, images, index.html) és la web que comunica amb la part servidora a AWS
-* Si s'executa 
 
-        $ node uncss.js > css/styles.css
+# TODO
 
-    es generen els css necessaris. Per a provar els estils complets, canviar les referències corresponents al <head>
-
-* Per a executar el web el local es pot fer de la següent manera (http://localhost està habilitat a l'autenticació SAML com a origen vàlid)
-
-        $ sudo ./http-server --dir=.
+* Serverless template to deploy it easy
+* Lambda to enable download with pre-signed url

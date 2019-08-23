@@ -1,9 +1,7 @@
 var LoginWindow;
-var logindomain = "https://2azu9l48b1.execute-api.eu-west-1.amazonaws.com"
 
 var _$ = function(_element){
     var element = null;
-    var xhr = null;
 
     var myDOM = {
         get : function(el){
@@ -41,9 +39,9 @@ var _$ = function(_element){
             return this;
         },
         ready : function(fn){
-            if (document.readyState != 'loading'){
+            if(document.readyState != 'loading'){
                 fn();
-            } else {
+            }else{
                 document.addEventListener('DOMContentLoaded', fn);
             }
         }
@@ -55,18 +53,18 @@ var _$ = function(_element){
 
 function decoder(base64url) {
     try {
-        var base64 = base64url.replace('-', '+').replace('_', '/')
-        var utf8 = atob(base64)
-        var json = JSON.parse(utf8)
-        var json_string = JSON.stringify(json, null, 4)
+        var base64 = base64url.replace('-', '+').replace('_', '/');
+        var utf8 = atob(base64);
+        var json = JSON.parse(utf8);
+        var json_string = JSON.stringify(json, null, 4);
     } catch (err) {
-        json_string = "Bad Section.\nError: " + err.message
+        json_string = "Bad Section.\nError: " + err.message;
     }
-    return json_string
+    return json_string;
 }
 
 window.addEventListener('message', function(e) {
-    if(e.origin !== logindomain){
+    if(e.origin !== LoginDomain){
         return;
     }
     var message = JSON.parse(decoder(e.data.split(".")[1]));
@@ -88,7 +86,7 @@ function Login(title, w, h){
             
     var left = ((width / 2) - (w / 2)) + dualScreenLeft;  
     var top = ((height / 2) - (h / 2)) + dualScreenTop;  
-    LoginWindow = window.open(logindomain+"/pro/getJWT", title, 'scrollbars=yes, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);  
+    LoginWindow = window.open(LoginDomain+LoginPath, title, 'scrollbars=yes, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);  
     // Puts focus on the newWindow  
     if (window.focus) {  
         LoginWindow.focus();  
@@ -115,37 +113,11 @@ function showName(){
         _$("#login_container").addCss("display","none");
         _$("#browser_container").addCss("display","block");
         _$("#browser_container h2").text("Hola " + window.localStorage.getItem("token_name"));
-        //getUploadForm();
-
-        /*$.ftps3({
-            endpoint_signedform : "https://favyoweaj6.execute-api.eu-west-1.amazonaws.com/dev/getuploadform",
-            endpoint_browse : "https://favyoweaj6.execute-api.eu-west-1.amazonaws.com/dev/getfiles",
-            endpoint_delete : "https://favyoweaj6.execute-api.eu-west-1.amazonaws.com/dev/deletekeys",
-            auth_token : window.localStorage.getItem("token"),
-            key_root : window.localStorage.getItem("token_email"),
-            browser_selector: "#browser",
-            uploadarea_selector: ".upload-area",
-            uploadarea_message_selector: ".upload-area h1",
-            logarea_selector: ".log-area",
-            max_upload_threads: 40,
-            messages : {
-                "ondelete" : "Segur que vols eliminar els fitxers?",
-                "dragarea" : "Arrossega o clica per a seleccionar"
-            },
-            initActionHook : function(){
-                $("#loader").addClass("loading").css("display","block");
-            },
-            endActionHook : function(){
-                $("#loader").removeClass("loading").css("display","none");
-            }
-        }).getKeys();
-
-        $.ftps3().setUpload();*/
 
         ftps3({
-            endpoint_signedform : "https://favyoweaj6.execute-api.eu-west-1.amazonaws.com/dev/getuploadform",
-            endpoint_browse : "https://favyoweaj6.execute-api.eu-west-1.amazonaws.com/dev/getfiles",
-            endpoint_delete : "https://favyoweaj6.execute-api.eu-west-1.amazonaws.com/dev/deletekeys",
+            endpoint_signedform : FTP_endpoint + "/dev/getuploadform",
+            endpoint_browse : FTP_endpoint +"/dev/getfiles",
+            endpoint_delete : FTP_endpoint +"/dev/deletekeys",
             auth_token : window.localStorage.getItem("token"),
             key_root : window.localStorage.getItem("token_email"),
             browser_selector: "#browser",
@@ -154,8 +126,7 @@ function showName(){
             logarea_selector: ".log-area",
             max_upload_threads: 40,
             messages : {
-                "ondelete" : "Segur que vols eliminar els fitxers?",
-                "dragarea" : "Arrossega o clica per a seleccionar"
+                "ondelete" : "Sure?"
             },
             initActionHook : function(){
                 _$("#loader").addClass("loading").addCss("display","block");

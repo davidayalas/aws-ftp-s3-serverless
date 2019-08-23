@@ -1,5 +1,4 @@
 'use strict';
-console.log('poc-ftp-serverless-browser');
 
 const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
@@ -16,7 +15,6 @@ exports.handler = async (event, context) => {
     if(event.requestContext && event.requestContext.authorizer && event.requestContext.authorizer.user){
         user = JSON.parse(event.requestContext.authorizer.user);
     }
-    console.log(event.requestContext)
     if(!user){
        return { 
         "statusCode": 403,
