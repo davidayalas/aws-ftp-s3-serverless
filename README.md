@@ -41,38 +41,13 @@ Features:
 
 ## Setup interface
 
-Include [js/ftps3.js](js/ftps3.js) in your html.
+Create file "js/endpoints.js" with the following content replacing values with aproppiate:
 
-    ftps3({
-        endpoint_signedform : "your lambda or endpoint",
-        endpoint_browse : "your lambda or endpoint",
-        endpoint_delete : "your lambda or endpoint",
-        endpoint_getpresignedurls : "your lambda or endpoint",
-        auth_token : "auth token to validate againt api gw custom authorizer",
-        key_root : "in a bucket shared for some users, 'user key'",
-        
-        browser_selector: "#browser"
-        uploadarea_selector: "#upload-area",
-        uploadarea_message_selector: "#upload-area-message",
-        logarea_selector : "#log-area",
-        max_upload_threads : 10, //to process internal queue quickly
-        messages: {
-            "dragover_html" : "Drag here",
-            "dragarea" : "Drag file/folder or click",
-            "dragenter" : "Drop",
-            "dragover_uploadarea" : "Drop",
-            "ondrop" : "Upload",
-            "onuploading" : "Uploading...",
-            "onfinish" : "Uploaded!",
-            "ondelete" : "Are you sure you want to delete key/s?"
-        },
-        initActionHook : function(){},
-        endActionHook : function(){}
-    });
-
-    ftps3().getKeys();
-    ftps3().setUpload();
-
+```javascript
+var LoginDomain = "https://xxxxxxxx.execute-api.eu-west-1.amazonaws.com";
+var LoginPath = "/pro/getJWT";
+var FTP_endpoint = "https://xxxxxxxx.execute-api.eu-west-1.amazonaws.com";
+```
 
 # TODO
 
