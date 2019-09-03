@@ -93,8 +93,9 @@
         return {
             getKeys : function(path, refresh){_getKeys(path, refresh);},
             setUpload : function(){_setUpload();},
-            deleteKeys : function(){_deleteAll();},
+            deleteKeys : function(){_deleteSelected();},
             createFolder : function(){_createFolderInput();},
+            downloadKeys : function(){_downloadSelected();},
             getExplorer : function(){return explorer;},
         }
     }
@@ -366,13 +367,13 @@
                 aux = aux.slice(0,aux.length-1);
             }
             currentPath = data.CommonPrefixes[i].Prefix.replace(keyRoot+"/","");
-            _$(settings.browser_selector+"-toc").append("<tr class='ftps3-item-folder'><td colspan='2'><input type='checkbox' value='"+currentPath+"' class='ftps3-todelete' /> <i class='fa fa-folder' aria-hidden='true'></i> <a href='#' onclick='ftps3().getKeys(\""+settings.currentDir+aux+"\")'>" + aux + "</a></td></tr>");
+            _$(settings.browser_selector+"-toc").append("<tr class='ftps3-item-folder'><td colspan='2'><input type='checkbox' value='"+currentPath+"' class='ftps3-action' /> <i class='fa fa-folder' aria-hidden='true'></i> <a href='#' onclick='ftps3().getKeys(\""+settings.currentDir+aux+"\")'>" + aux + "</a></td></tr>");
         }
 
         for(var i=0,z=data.Contents.length;i<z;i++){
             aux = data.Contents[i].Key.slice(data.Contents[i].Key.lastIndexOf("/")+1);
             if(aux!==""){
-                _$(settings.browser_selector+"-toc").append("<tr class='ftps3-item-file'><td class='ftps3-item-filename'><input type='checkbox' class='ftps3-todelete' value='"+data.Contents[i].Key.replace(keyRoot+"/","") + "'/> <i class='fa fa-file' aria-hidden='true'></i> " + aux + "</td><td class='ftps3-item-filesize'>"+ _bytesToSize(data.Contents[i].Size) +"</td><td class='ftps3-item-date'>"+_getDate(data.Contents[i].LastModified)+"</td></tr>");
+                _$(settings.browser_selector+"-toc").append("<tr class='ftps3-item-file'><td class='ftps3-item-filename'><input type='checkbox' class='ftps3-action' value='"+data.Contents[i].Key.replace(keyRoot+"/","") + "'/> <i class='fa fa-file' aria-hidden='true'></i> " + aux + "</td><td class='ftps3-item-filesize'>"+ _bytesToSize(data.Contents[i].Size) +"</td><td class='ftps3-item-date'>"+_getDate(data.Contents[i].LastModified)+"</td></tr>");
             }
         }    
     }
@@ -537,7 +538,7 @@
         }
         fd.append('file', file);
         if(settings.logarea_selector){
-            _$(settings.logarea_selector).prepend("<p><span class='ftps3-upload-log-"+cleanName(file.name)+"'>Uploading </span> " + path + file.name + "</p>");
+            _$(settings.logarea_selector).prepend("<p><span class='ftps3-action-log-"+cleanName(file.name)+"'>Uploading </span> " + path + file.name + "</p>");
         }
         _fnUpload(fd, cb);
     }
@@ -549,7 +550,7 @@
         _$(settings.uploadarea_message_selector).text(settings.messages.onuploading);
         _request("POST", settings.signedFormData.endpoint, function(response){
             if(settings.logarea_selector){
-                _$(".ftps3-upload-log-"+cleanName(formdata.get("file").name)).html("Uploaded");
+                _$(".ftps3-action-log-"+cleanName(formdata.get("file").name)).html("Uploaded");
             }
             _$(settings.uploadarea_message_selector).text(settings.messages.onfinish);
             if(typeof cb==="function"){cb();}
@@ -566,7 +567,7 @@
 
     /* 
     * Delete management. 
-    * Gets all keys checked (input.ftps3-todelete:checked) and sends to lambda backend. 
+    * Gets all keys checked (input.ftps3-action:checked) and sends to lambda backend. 
     * POST better than DELETE because we need send body
     */
     var _deleteKeys = function(keys){
@@ -574,7 +575,7 @@
         _request("POST", settings.endpoint_delete, function(data){
             data = JSON.parse(data);
             if(data.message==="done"){
-                _$(".ftps3-delete-log-item").html("Deleted");
+                _$(".ftps3-action-log-item").html("Deleted");
                 _getKeys(settings.currentDir);
             }
         }, JSON.stringify({"keys" : keys}));
@@ -583,20 +584,91 @@
     /*
     * Get all files to delete from interface
     */
-    var _deleteAll = function(){
+    var _deleteSelected = function(){
         var message=settings.messages.ondelete;
-        console.log(_$(settings.browser_selector + " input.ftps3-todelete:checked").size())
-        if(_$(settings.browser_selector + " input.ftps3-todelete:checked").size()>0 && window.confirm(message)){
+        console.log(_$(settings.browser_selector + " input.ftps3-action:checked").size())
+        if(_$(settings.browser_selector + " input.ftps3-action:checked").size()>0 && window.confirm(message)){
             settings.loading(); 
             var keys = [];
-            _$(settings.browser_selector + " input.ftps3-todelete:checked").each(function(item){
+            _$(settings.browser_selector + " input.ftps3-action:checked").each(function(item){
                 keys.push(item.value);
                 if(settings.logarea_selector){
-                    _$(settings.logarea_selector).prepend("<p><span class='ftps3-delete-log-item'>Deleting</span> " + item.value + "</p>");
+                    _$(settings.logarea_selector).prepend("<p><span class='ftps3-action-log-item'>Deleting</span> " + item.value + "</p>");
                 }
 
             });
             _deleteKeys(keys)
         }
     }
+
+    /*
+    * Get all files to download from interface
+    */
+   var _downloadSelected = function(){
+    console.log(_$(settings.browser_selector + " input.ftps3-action:checked").size())
+    if(_$(settings.browser_selector + " input.ftps3-action:checked").size()>0){
+        settings.loading(); 
+        var keys = [];
+        _$(settings.browser_selector + " input.ftps3-action:checked").each(function(item){
+            //Check not directory
+            if(!item.value.endsWith("/")) {
+                keys.push(item.value);
+                if(settings.logarea_selector){
+                    _$(settings.logarea_selector).prepend("<p><span class='ftps3-action-log-item'>Downloading</span> " + item.value + "</p>");
+                }
+            }
+            else {
+                console.warn("Evicting directory " + item.value);
+            }
+        });
+        _getFiles(keys)
+    }
+   }
+
+    /* 
+    * Download management. 
+    * Gets all keys checked (input.ftps3-action:checked) and sends to lambda backend. 
+    * POST better than GET because we need send body
+    */
+   var _getFiles = function(keys){
+        if(!keys){return;}
+
+        _request("POST", settings.endpoint_getpresignedurls, function(data){
+            data = JSON.parse(data);
+
+            if(data.urls){
+                var numDownloadedFiles = 0;
+                data.urls.forEach(function(entry, i) {
+
+                    fetch(entry, {method: 'GET'})
+                        .then(res => {
+                            return res.blob();
+                        })
+                        .then(blob => {
+                            var url = window.URL.createObjectURL(blob);
+                            var a = document.createElement('a');
+                            a.href = url;
+                            a.download = keys[i];
+                            document.body.appendChild(a); 
+                            a.click();  
+                            setTimeout(
+                            _ => { window.URL.revokeObjectURL(url); }, 
+                            60000); 
+                            a.remove();
+
+                            _$(".ftps3-action-log-item").html("Downloaded");
+                                
+                            numDownloadedFiles++;
+                            if(numDownloadedFiles == keys.length) {
+                                settings.endLoading();
+                            }
+                        })
+                        .catch(err => {
+                            console.error('err: ', err);
+                    })            
+                });
+            }
+        }, JSON.stringify({"keys" : keys}));
+    }
+
 }(window));

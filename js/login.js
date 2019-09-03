@@ -118,6 +118,7 @@ function showName(){
             endpoint_signedform : FTP_endpoint + "/dev/getuploadform",
             endpoint_browse : FTP_endpoint +"/dev/getfiles",
             endpoint_delete : FTP_endpoint +"/dev/deletekeys",
+            endpoint_getpresignedurls : FTP_endpoint +"/dev/getpresignedurls",         
             auth_token : window.localStorage.getItem("token"),
             key_root : window.localStorage.getItem("token_email"),
             browser_selector: "#browser",
