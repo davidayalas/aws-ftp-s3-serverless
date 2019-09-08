@@ -2,6 +2,8 @@
 
 The goal of this project is to provide a space for users under a AWS S3 bucket (shared S3 bucket with a "folder" for every user), with a web interface to upload, browse, download and remove files.
 
+This PoC is done between [asamo7](https://github.com/asamo7) and [davidayalas](https://github.com/davidayalas).
+
 Features:
 
 * Each user only sees its "folder" under S3 bucket. The folder is its "id" from OAuth or SAML

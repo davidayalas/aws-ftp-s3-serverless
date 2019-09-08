@@ -620,7 +620,7 @@
                 console.warn("Evicting directory " + item.value);
             }
         });
-        _getFiles(keys)
+        _getFiles(keys);
     }
    }
 
