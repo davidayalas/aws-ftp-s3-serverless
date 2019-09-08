@@ -130,7 +130,7 @@
             return queue_counter;
         },
         getItem: function(){
-            return queue.shift();
+            return queue.pop();
         }
     }    
 
@@ -143,81 +143,95 @@
                 return document.querySelectorAll(el);
             },
             append : function(strHTML){
+                if(!element){return this;}
                 [].forEach.call(element, function(el) {
                     el.insertAdjacentHTML('beforeend', strHTML);
                 }); 
                 return this;
             },
             prepend : function(strHTML){
+                if(!element){return this;}
                 [].forEach.call(element, function(el) {
                     el.insertAdjacentHTML('afterbegin', strHTML);
                 }); 
                 return this;
             },
             insertBefore : function(strHTML){
+                if(!element){return this;}
                 [].forEach.call(element, function(el) {
                     el.insertAdjacentHTML('beforebegin', strHTML);
                 });
                 return this;
             },
             addCss : function(style, value){
+                if(!element){return this;}
                 [].forEach.call(element, function(el) {
                     el.style[style] = value; // or add a class
                 })
                 return this;
             },
             removeClass : function(className){
+                if(!element){return this;}
                 element.forEach(function(item){
                     item.classList.remove(className);
                 });
                 return this;
             },
             addClass : function(className){
+                if(!element){return this;}
                 element.forEach(function(item){
                     item.classList.add(className);
                 });
                 return this;
             },
             each : function(fn){
+                if(!element){return this;}
                 element.forEach(function(item){
                     fn(item);
                 });
                 return this;
             },
             on : function(eventName, eventHandler){
+                if(!element){return this;}
                 Array.prototype.forEach.call(element, function (item) {
                     item.addEventListener(eventName, eventHandler);
                 });
                 return this;
             },
             slice : function(start, end){
+                if(!element){return this;}
                 element = Array.from(element).slice(start, end);
                 return this;
             },
 
             size : function(){
+                if(!element){return 0;}
                 return element.length;
             },
 
             empty : function(){
+                if(!element){return this;}
                 [].forEach.call(element, function(el) {
                     el.innerHTML = "";
                 });
                 return this;
             },
             html : function(str){
+                if(!element){return this;}
                 [].forEach.call(element, function(el) {
                     el.innerHTML = str;
                 });
                 return this;
             },
             text : function(str){
+                if(!element){return this;}
                 [].forEach.call(element, function(el) {
                     el.textContent = str;
                 });
                 return this;
             },
             remove : function(){
+                if(!element){return this;}
                 [].forEach.call(element, function(el) {
                     el.parentNode.removeChild(el);
                 })
@@ -476,10 +490,10 @@
         if (item.isFile) {
             // Get and upload file
             item.file(function(file) {
-            uploadqueue.push([file, path]);
-            if(((uploadqueue.length() % 100)===0 && uploadqueue.startNewQueue()) || uploadqueue.queuesLength()===0){
-                uploadqueue.process(1); //add a queue process until "max_upload_threads"
-            }
+                uploadqueue.push([file, path]);
+                if(((uploadqueue.length() % 100)===0 && uploadqueue.startNewQueue()) || uploadqueue.queuesLength()===0){
+                    uploadqueue.process(1); //add a queue process until "max_upload_threads"
+                }
             });
         
         } else if (item.isDirectory) {
@@ -518,6 +532,7 @@
         return _name
             .replace(/\./g,"-")
             .replace(/\$/g,"-")
+            .replace(/~/g,"-")
         ;
     }
 
