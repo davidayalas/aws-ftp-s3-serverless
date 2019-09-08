@@ -15,6 +15,7 @@
         endpoint_signedform : "your lambda or endpoint",
         endpoint_browse : "your lambda or endpoint",
         endpoint_delete : "your lambda or endpoint",
+        endpoint_getpresignedurls : "your lambda or endpoint",
         auth_token : "auth token to validate againt api gw custom authorizer",
         key_root : "in a bucket shared for some users, 'user key'",
 
@@ -135,7 +136,6 @@
 
     var _$ = function(_element){
         var element = null;
-        var xhr = null;
 
         var myDOM = {
             get : function(el){
@@ -586,7 +586,6 @@
     */
     var _deleteSelected = function(){
         var message=settings.messages.ondelete;
-        console.log(_$(settings.browser_selector + " input.ftps3-action:checked").size())
         if(_$(settings.browser_selector + " input.ftps3-action:checked").size()>0 && window.confirm(message)){
             settings.loading(); 
             var keys = [];
@@ -605,7 +604,6 @@
     * Get all files to download from interface
     */
    var _downloadSelected = function(){
-    console.log(_$(settings.browser_selector + " input.ftps3-action:checked").size())
     if(_$(settings.browser_selector + " input.ftps3-action:checked").size()>0){
         settings.loading(); 
         var keys = [];
@@ -618,6 +616,7 @@
                 }
             }
             else {
+                settings.endLoading(); 
                 console.warn("Evicting directory " + item.value);
             }
         });
