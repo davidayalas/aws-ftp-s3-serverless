@@ -289,6 +289,8 @@
             uploadData(new File([""], ""),folder+"/",function(){
                 _getKeys("", true);
             });
+        }else{
+            settings.endLoading();
         }
     }
 
