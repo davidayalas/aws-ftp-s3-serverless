@@ -535,6 +535,8 @@
             .replace(/\./g,"-")
             .replace(/\$/g,"-")
             .replace(/~/g,"-")
+            .replace(/\s/g,"-")
+            .replace(/[\(\)\[\]]/g,"-")
         ;
     }
 
@@ -567,7 +569,9 @@
         _$(settings.uploadarea_message_selector).text(settings.messages.onuploading);
         _request("POST", settings.signedFormData.endpoint, function(response){
             if(settings.logarea_selector){
-                _$(".ftps3-action-log-"+cleanName(formdata.get("file").name)).html("Uploaded");
+                try{
+                    _$(".ftps3-action-log-"+cleanName(formdata.get("file").name)).html("Uploaded");
+                }catch(e){}
             }
             _$(settings.uploadarea_message_selector).text(settings.messages.onfinish);
             if(typeof cb==="function"){cb();}
