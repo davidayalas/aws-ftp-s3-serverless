@@ -53,4 +53,6 @@ var FTP_endpoint = "https://xxxxxxxx.execute-api.eu-west-1.amazonaws.com";
 
 # TODO
 
+* Quotas
+* Sharing
 * Serverless template to deploy it easy
