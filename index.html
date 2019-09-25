@@ -84,7 +84,6 @@
             width: 100%;
             height: 100%;
             background: radial-gradient(rgba(20, 20, 20,.8), rgba(0, 0, 0, .8));
-        
             background: -webkit-radial-gradient(rgba(20, 20, 20,.8), rgba(0, 0, 0,.8));
         }
         
@@ -205,6 +204,29 @@
                 display: none;
             }
         }        
+
+        #message {
+            visibility:hidden;
+            position: absolute;
+            left: 0px;
+            top: 0px;
+            width:100%;
+            height:100%;
+            text-align:center;
+            z-index: 1000;
+            background: radial-gradient(rgba(20, 20, 20,.8), rgba(0, 0, 0, .8));
+            background: -webkit-radial-gradient(rgba(20, 20, 20,.8), rgba(0, 0, 0,.8));
+        }
+
+        #message div {
+            width:300px;
+            margin: 100px auto;
+            background-color: #fff;
+            border:1px solid #000;
+            padding:15px;
+            text-align:center;
+        }        
+
       </style>
 </head>
 
@@ -216,6 +238,11 @@
 	<main>
 	    <div>
             <div id="loader" style="display: none">Loading&#8230;</div>
+            <div id="message">
+                <div>
+                    <p class="message"></p>
+                </div>
+            </div>
 
             <!-- LOGIN BUTTON -->
             <div id="login_container">

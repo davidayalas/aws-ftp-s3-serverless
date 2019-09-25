@@ -134,6 +134,10 @@ function showName(){
             },
             endActionHook : function(){
                 _$("#loader").removeClass("loading").addCss("display","none");
+            },
+            messageHook : function(message){
+                _$("#message").addCss("visibility","visible");
+                _$("#message .message").text(message)
             }
         });
         ftps3().getKeys();

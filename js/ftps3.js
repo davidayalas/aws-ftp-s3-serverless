@@ -56,11 +56,13 @@
             "onfinish" : "Uploaded!",
             "ondelete" : "Are you sure you want to delete key/s?",
             "folder_prompt" : "Folder name?",
-            "folder_prompt_value" : "folder"
+            "folder_prompt_value" : "folder",
+            "notAuthMsg" : "you are not authorized"
         },
         initActionHook : function(){},
         endActionHook : function(){}
     };
+    var authorized = false;
     var explorer = null;
     var queue = [];
     var queue_counter = 0;
@@ -88,6 +90,12 @@
             if(settings.endActionHook && typeof settings.endActionHook==="function"){
                 settings.endLoading = function(){
                     settings.endActionHook();
+                };
+            }
+
+            if(settings.messageHook && typeof settings.messageHook==="function"){
+                settings.message = function(msg){
+                    settings.messageHook(msg);
                 };
             }
         }
@@ -267,11 +275,20 @@
             xhr.onreadystatechange = function(){
                 if (this.readyState===4 && (this.status===200 || this.status===204)) {
                     var data = this.responseText;
+                    authorized=true;
                     callback(data);
                 } else {
                     // We reached our target server, but it returned an error
-                    if(this.status===401){
-                        window.location.reload();
+                    switch(this.status){
+                        case 401:
+                            window.location.reload();
+                            break;
+                        case 403:
+                            settings.endLoading();
+                            authorized=false;
+                            settings.message(settings.messages.notAuthMsg); 
+                            xhr.abort();
+                            break;
                     }
                 }
             };
