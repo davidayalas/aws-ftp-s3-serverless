@@ -31,8 +31,9 @@ Features:
 * Basic env variables:
 
     - SAML_CERT: you idp saml certificate as string
+    - IDP_HOST: your idp
     - JWT_SECRET: to sign JWT from SAML and validate from custom authorizer
-    - AUTH_USERS: list of users with permissions to use the service (it will will a CSV queried with S3 Select)
+    - AUTH_USERS: list of users with permissions (it will be a CSV queried with S3 Select)
 
 * Deploy demo
 
