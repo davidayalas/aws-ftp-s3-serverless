@@ -1,0 +1,182 @@
+service: ${self:custom.serviceName}
+
+plugins:
+  - serverless-s3-sync
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: ${opt:stage, 'demo'}
+  region: ${env:region, 'eu-west-1'}
+  memorySize: 128
+  stackTags:
+    name: ${self:service}
+  iamRoleStatements:
+    - Effect: 'Allow'
+      Action:
+        - 's3:*'
+      Resource: "*"
+    - Effect: 'Allow'
+      Action: 
+        - sts:AssumeRole
+      Resource: "*"
+
+  environment:
+    BUCKET: ${self:custom.dataBucket}
+    ROLE: { "Fn::GetAtt" : [ "IamRoleLambdaExecution", "Arn" ] }
+    ORIGIN: https://${self:custom.frontBucket}.s3-${self:provider.region}.amazonaws.com
+
+resources:
+  Resources:
+    GatewayResponseDefault4XX:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
+    GatewayResponseDefault5XX:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: DEFAULT_5XX
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'          
+
+    S3Data:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.dataBucket}
+        CorsConfiguration:
+          CorsRules:
+            - AllowedMethods:
+                - GET
+                - POST
+                - HEAD
+              AllowedOrigins: 
+                - https://${self:custom.frontBucket}.s3-${self:provider.region}.amazonaws.com
+          
+    S3Front:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.frontBucket}
+        AccessControl: PublicRead
+        WebsiteConfiguration:
+          IndexDocument: index.html        
+
+    FrontEndBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket:
+          Ref: S3Front
+        PolicyDocument:
+          Statement:
+            - Sid: PublicReadGetObject
+              Effect: Allow
+              Principal: "*"
+              Action:
+              - s3:GetObject
+              Resource:
+                Fn::Join: [
+                  "", [
+                    "arn:aws:s3:::",
+                    {
+                      "Ref": "S3Front"
+                    },
+                    "/*"
+                  ]
+                ]
+
+functions:
+  browse:
+    handler: backend/browsing/index.handler
+    events:
+      - http:
+          path: getfiles
+          method: get
+          cors: true
+          authorizer:
+            name: custom-auth
+            resultTtlInSeconds: 1
+
+  delete:
+    handler: backend/delete-keys/index.handler
+    events:
+      - http:
+          path: deletekeys
+          method: post
+          cors: true
+          authorizer:
+            name: custom-auth
+            resultTtlInSeconds: 1
+
+  upload:
+    handler: backend/form-signing-sts/index.handler
+    events:
+      - http:
+          path: getuploadform
+          method: get
+          cors: true
+          authorizer:
+            name: custom-auth
+            resultTtlInSeconds: 1
+
+  download:
+    handler: backend/get-presigned-urls/index.handler
+    events:
+      - http:
+          path: getpresignedurls
+          method: post
+          cors: true
+          authorizer:
+            name: custom-auth
+            resultTtlInSeconds: 1
+
+  login:
+    handler: backend/login/app.handler
+    events:
+      - http:
+          path: /{proxy+}
+          method: any
+          cors: true
+
+    environment:
+      ALLOWED_DOMAINS: ${self:custom.frontBucket}.s3-${self:provider.region}.amazonaws.com
+      IDP_HOST: ${env:IDP_HOST}
+      JWT_SAML_PROFILE:	nameID,urn:oid:2.5.4.42
+      JWT_SECRET: ${env:JWT_SECRET, "12345678"}
+      SAML_CERT: ${env:SAML_CERT}
+      SAML_DOMAIN:
+        !Join
+          - ''
+          - - !Ref ApiGatewayRestApi
+            - '.execute-api.'
+            - ${self:provider.region}
+            - '.amazonaws.com'
+      SAML_ISSUER: saml-jwt-${self:custom.serviceName}
+      STAGE: ${self:provider.stage}
+
+  custom-auth:
+    handler: backend/custom-auth/index.handler
+    environment:
+      JWT_SECRET: ${env:JWT_SECRET, "12345678"}    
+      AUTH_USERS: ${env:AUTH_USERS}
+
+custom:
+  setupFile: ./setup.${self:provider.stage}.json
+  serviceName: ${file(${self:custom.setupFile}):serviceName}
+  frontBucket: ${self:custom.serviceName}-${file(${self:custom.setupFile}):frontendBucket}
+  dataBucket: ${self:custom.serviceName}-${file(${self:custom.setupFile}):dataBucket}
+  s3Sync:
+    - bucketName: ${self:custom.frontBucket} 
+      localDir: frontend
+      deleteRemoved: true
+
+package:
+  exclude:
+    - node_modules/**
+    - frontend/**

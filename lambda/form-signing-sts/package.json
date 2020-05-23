@@ -1,9 +1,0 @@
-{
-  "name": "ftp-serverless-form-signing",
-  "version": "0.0.1",
-  "description": "",
-  "main": "index.js",
-  "dependencies": {
-    "crypto-js": "*"
-  }
-}

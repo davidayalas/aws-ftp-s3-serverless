@@ -1,0 +1,5 @@
+{
+    "serviceName" : "ftp-serverless",
+    "frontendBucket" : "web",
+    "dataBucket" : "data"
+}

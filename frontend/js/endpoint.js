@@ -1,0 +1,1 @@
+var endpoint='https://f4f94z2mll.execute-api.eu-west-1.amazonaws.com';

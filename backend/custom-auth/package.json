@@ -1,0 +1,9 @@
+{
+  "name": "lamba-custom-auth",
+  "version": "0.0.1",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "jsonwebtoken": "^8.4.0"
+  }
+}

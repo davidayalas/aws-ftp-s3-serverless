@@ -1,3 +1,9 @@
-node_modules/
-js/endpoints.js
+.secrets
+node_modules
+package-lock.json
+yarn*
+.env
+.serverless
+js/endpoint.js
 http-server
+*.cert
