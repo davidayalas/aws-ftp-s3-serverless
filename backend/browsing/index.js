@@ -36,6 +36,12 @@ exports.handler = async (event, context) => {
     }
 
     const data = await s3.listObjectsV2(params).promise();
-    
+    for(let i=0,z=data.Contents.length;i<z;i++){
+        data.Contents[i].Key = data.Contents[i].Key.replace(user,"");
+    }
+    for(let i=0,z=data.CommonPrefixes.length;i<z;i++){
+        data.CommonPrefixes[i].Prefix = data.CommonPrefixes[i].Prefix.replace(user,"");
+    }
+    data.Prefix = data.Prefix.replace(user,"");
     return utils.getResponse(null, JSON.stringify(data));
 };

@@ -17,7 +17,7 @@
         endpoint_delete : "your lambda or endpoint",
         endpoint_getpresignedurls : "your lambda or endpoint",
         auth_token : "auth token to validate againt api gw custom authorizer",
-        key_root : "in a bucket shared for some users, 'user key'",
+        //key_root : "in a bucket shared for some users, 'user key'",
 
         
         browser_selector: ""
@@ -366,7 +366,7 @@
         _$(settings.browser_selector).empty();
         _$(settings.browser_selector).append("<table id='"+settings.browser_selector.slice(1)+"-toc'></table>");
         
-        var keyRoot = settings.key_root; //to remove from prefixes and contents due our interaction with our lambdas (and security--> root=user email)
+        var keyRoot = settings.key_root || ""; //to remove from prefixes and contents due our interaction with our lambdas (and security--> root=user email)
         var aux;
 
         var isRoot = (data.Prefix.replace(keyRoot+"/","")==="" ? true : false);

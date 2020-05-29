@@ -120,7 +120,7 @@ function showName(){
             endpoint_delete : endpoint +"/demo/deletekeys",
             endpoint_getpresignedurls : endpoint +"/demo/getpresignedurls",         
             auth_token : window.localStorage.getItem("token"),
-            key_root : window.localStorage.getItem("token_email"),
+            //key_root : window.localStorage.getItem("token_email"),
             browser_selector: "#browser",
             uploadarea_selector: ".upload-area",
             uploadarea_message_selector: ".upload-area h1",
