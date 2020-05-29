@@ -22,8 +22,12 @@ module.exports = function(){
 		return new RegExp(".*\."+val+"$");
 	});
 
-	let jwt_saml_profile = process.env.JWT_SAML_PROFILE || "nameID";
+	let jwt_saml_profile = process.env.JWT_SAML_PROFILE || "urn:oid:2.5.4.42";
 	jwt_saml_profile = jwt_saml_profile.split(",");
+
+	jwt_saml_profile = jwt_saml_profile.map(function(i){
+		return i.trim();
+	});
 
 	let stage = "";
 	if(process.env.STAGE){
@@ -31,8 +35,8 @@ module.exports = function(){
 	}
 	
 	let jwt_ttl=1800;
-	if(process.env.JWT_TTL){
-		jwt_ttl = process.env.JWT_TTL*1;
+	if(process.env.JWT_SAML_TTL){
+		jwt_ttl = process.env.JWT_SAML_TTL*1;
 	}
 
 	//Private Key

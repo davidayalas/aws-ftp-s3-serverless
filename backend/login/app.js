@@ -45,6 +45,10 @@ app.use(function(req, res, next){
     referer = req.apiGateway.event.headers.referer.replace(/^http(s?):\/\//, "");
   }
   
+  if(!req.cookies.origin){
+    res.cookie('origin', referer, { httpOnly: true, secure: true });
+  }
+
   if(!referer){
     return next();
   }
@@ -65,10 +69,10 @@ app.use(function(req, res, next){
 
 //nocache
 app.use(function (req, res, next) {
-  res.setHeader('Surrogate-Control', 'no-store')
-  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, private, max-age=0')
-  res.setHeader('Pragma', 'no-cache')
-  res.setHeader('Expires', '0')
+  res.setHeader('Surrogate-Control', 'no-store');
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, private, max-age=0');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
   res.removeHeader('Server');
   next();
 });

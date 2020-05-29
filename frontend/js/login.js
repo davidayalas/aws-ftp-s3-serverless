@@ -71,7 +71,7 @@ window.addEventListener('message', function(e) {
     window.localStorage.setItem("token_ttl", message.exp);
     window.localStorage.setItem("token", e.data);
     window.localStorage.setItem("token_name", message["urn:oid:2.5.4.42"]);
-    window.localStorage.setItem("token_email", message.nameID);
+    window.localStorage.setItem("token_email", message["urn:oid:0.9.2342.19200300.100.1.3"]);
     LoginWindow.close();
     showName();
 });

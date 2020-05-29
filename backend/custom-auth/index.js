@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
+const s3select = require("./s3select");
 
-const auth_users = process.env.AUTH_USERS ? process.env.AUTH_USERS.split(",") : [];
+const _BUCKET = process.env.BUCKET || "";
+const _FILE = process.env.FILE || "";
 
 const buildIAMPolicy = (userId, effect, resource, context) => {
     const policy = {
@@ -21,8 +23,18 @@ const buildIAMPolicy = (userId, effect, resource, context) => {
     return policy;
 };
 
-function isAllowed(user){
-  return auth_users.includes(user) ? "Allow" : "Deny";
+async function getPermissions(user){
+  if(!_BUCKET || !_FILE){
+    return [];
+  }
+
+  const permissions = await s3select.query({
+    "Bucket" : _BUCKET, 
+    "Key": _FILE, 
+    "Expression": `select * from s3object s where s.id='${user}'`,
+  });
+  
+  return JSON.parse(permissions);
 }
   
 /**
@@ -32,23 +44,23 @@ function isAllowed(user){
   * @throws Returns 401 if the token is invalid or has expired.
   * @throws Returns 403 if the token does not have sufficient permissions.
   */
-module.exports.handler = (event, context, callback) => {
+module.exports.handler = async (event, context, callback) => {
   const token = event.authorizationToken;
+  if(!token){
+    return ('Unauthorized ', 'No token'); // Return a 401 Unauthorized response
+  }
   try {
     // Verify JWT
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = decoded.nameID;
-    // Checks if the user's scopes allow her to call the current function
-    //const isAllowed = authorizeUser([]], event.methodArn);
+    const user = decoded["urn:oid:0.9.2342.19200300.100.1.3"];
 
-    const effect = isAllowed(user);
-    const userId = user.nameID;
-    const authorizerContext = { user: JSON.stringify(user) };
-    // Return an IAM policy document for the current endpoint
-    const policyDocument = buildIAMPolicy(userId, effect, event.methodArn, authorizerContext);
+    const permissions = await getPermissions(user);
+    const effect = permissions.length>0 ? "Allow" : "Deny";
+    const authorizerContext = { "user": user, "permissions" : permissions[0][1]};
+    const policyDocument = buildIAMPolicy(user, effect, event.methodArn, authorizerContext);
 
-    callback(null, policyDocument);
+    return (null, policyDocument); 
   } catch (e) {
-    callback('Unauthorized'); // Return a 401 Unauthorized response
+    return ('Unauthorized ', e.message); // Return a 401 Unauthorized response
   }
 }; 

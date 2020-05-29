@@ -18,7 +18,7 @@ Features:
 
 * Folder creation
 
-## Deploy requirements
+## Deployment requirements
 
 * Serverless framework: https://www.serverless.com/framework/docs/getting-started/
 * Setup AWS credentials: https://www.serverless.com/framework/docs/providers/aws/cli-reference/config-credentials/
@@ -33,7 +33,6 @@ Features:
     - SAML_CERT: you idp saml certificate as string
     - IDP_HOST: your idp
     - JWT_SECRET: to sign JWT from SAML and validate from custom authorizer
-    - AUTH_USERS: list of users with permissions (it will be a CSV queried with S3 Select)
 
 * Deploy demo
 
@@ -57,6 +56,12 @@ Features:
 1. Get presigned urls > [lambda/get-presigned-urls/index.js](lambda/get-presigned-urls/index.js) This lambda generate presigned urls for objects to be downloaded safely
 
 1. Login: in this case SAML based to generate a JWT token.
+
+    - Default setup points to samltest.id. [Metadata](/docs/sp-metadata.xml) for samltest.id is generated with [https://www.samltool.com/sp_metadata.php](https://www.samltool.com/sp_metadata.php):
+    - In "Attribute Consume Service Endpoint (HTTP-POST)" you have to put your api endpoint:
+
+            https://${api gateway id}.execute-api.${region}.amazonaws.com/${stage}/login/callback
+
 
 ## Setup interface
 

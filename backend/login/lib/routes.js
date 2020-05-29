@@ -13,7 +13,7 @@ module.exports = function (app, config, passport) {
 	}
 
 	function checkHost(req, res, next){
-
+		
 		if(!req.query.referer || req.query.referer.length===0){
 			req.query.referer = [req.cookies.referer]; 
 		}
@@ -86,8 +86,26 @@ module.exports = function (app, config, passport) {
 				);
 			})()
 			</script>
-		`
-		res.send(script)		
+		`;
+		res.send(script);	
+	});
+
+	//sets cookie JWT token
+	app.get("/setCookieJWT*", ensureAuthenticated, function(req, res, next){
+		var object2Sign = {};
+
+		for(var i=0,z=config.jwt_saml_profile.length;i<z;i++){
+			object2Sign[config.jwt_saml_profile[i]] = req.user.profile[config.jwt_saml_profile[i]];
+		}
+		
+		var token = jwt.sign(object2Sign, config.jwt_secret, { expiresIn: config.jwt_ttl });
+
+		const referer = req.cookies.origin;
+		
+		res.cookie('Authorization', token, { httpOnly: true, secure: true, sameSite: 'strict' });
+		res.clearCookie("origin");
+
+		res.redirect(referer);
 	});
 
 };

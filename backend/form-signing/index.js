@@ -13,7 +13,7 @@ exports.handler = async (event, context) => {
     
     let user = null;
     if(event.requestContext && event.requestContext.authorizer && event.requestContext.authorizer.user){
-        user = JSON.parse(event.requestContext.authorizer.user);
+        user = event.requestContext.authorizer.user;
     }   
 
     if(!user){
