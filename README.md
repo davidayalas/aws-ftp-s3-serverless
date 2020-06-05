@@ -54,7 +54,7 @@ Features:
 ![screen](docs/screen-1.png)
 ![screen while uploading](docs/screen-2.png)
 
-## Lambdas
+## Backend
 
 1. [Upload](backend/form-signing-sts/index.js): this lambda generates the signature for valid uploads. 
 
@@ -75,7 +75,7 @@ Features:
 
 1. [Custom authorizer](backend/custom-auth/index.js): validates JWT token and adds extra permissions from [CSV](data/permissions.csv)
 
-## Setup interface
+## Frontend
 
 Create file "js/endpoint.js" with the following content replacing values with aproppiate. You can generate it from sls info output:
 
