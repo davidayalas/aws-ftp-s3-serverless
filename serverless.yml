@@ -22,7 +22,6 @@ provider:
       Resource: "*"
 
   environment:
-    BUCKET: ${self:custom.dataBucket}
     ROLE: { "Fn::GetAtt" : [ "IamRoleLambdaExecution", "Arn" ] }
     ORIGIN: https://${self:custom.frontBucket}.s3-${self:provider.region}.amazonaws.com
 

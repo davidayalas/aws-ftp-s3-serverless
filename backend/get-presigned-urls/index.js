@@ -4,8 +4,6 @@ const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
 const utils = require('../utils');
 
-const _BUCKET = process.env.BUCKET;
-
 exports.handler = async (event, context) => {
     const check = utils.checkAuth(event);
 
@@ -36,7 +34,7 @@ exports.handler = async (event, context) => {
         let val = utils.adaptKey(event, key, check.user);        
 
         const url = s3.getSignedUrl('getObject', {
-            Bucket: _BUCKET,
+            Bucket: check.bucket,
             Key: val,
             Expires: signedUrlExpireSeconds
         });

@@ -1,22 +1,25 @@
 # PoC AWS FTP S3 Serverless
 
-The goal of this project is to provide a space for users under a AWS S3 bucket (shared S3 bucket with a "folder" for every user), with a web interface to upload, browse, download and remove files.
+The goal of this project is to provide a space for users under AWS S3 buckets (shared S3 buckets with a "folder" for every user), with a web interface to upload, browse, download and remove files.
 
 This PoC is done between [asamo7](https://github.com/asamo7) and [davidayalas](https://github.com/davidayalas).
 
 Features:
 
-* Each user only sees its "folder" under S3 bucket. The folder is its "id" from OAuth or SAML
-    - In our PoC, it works with SAML-JWT deployed as a lambda (https://github.com/davidayalas/saml-jwt)
-    - You need a Custom Authorizer for your API Gateway to validate JWT Token (sample here [backend/custom-auth/index.js](backend/custom-auth/index.js)). Sample here: https://yos.io/2017/09/03/serverless-authentication-with-jwt/
+* It's possible to setup "users" and "admins". 
 
-* User can upload folders (drag and drop) and the structure is recreated in S3
+* A **user** adds its username (email from saml response) to the each key. An **admin** can see everything under a bucket or a folder. See [permissions.csv](data/permissions.csv).
+    - In our PoC, it works with SAML-JWT (https://samltest.id for demo purposes) deployed as a lambda (https://github.com/davidayalas/saml-jwt)
+    - You need a Custom Authorizer for your API Gateway to validate JWT Token (sample here [backend/custom-auth/index.js](backend/custom-auth/index.js)). 
+    - Our [custom authorizer](backend/custom-auth/index.js) queries with S3 Select the CSV and retrieves the permissions for a user and adds the buckets, folders and roles to the context. 
+
+* A user can upload folders (drag and drop) and the structure is recreated in S3
 
 * Files can be downloaded (not directories)
 
 * Folders can be deleted (included not empty)
 
-* Folder creation
+* A user can create a folder
 
 ## Deployment requirements
 
@@ -53,15 +56,15 @@ Features:
 
 ## Lambdas
 
-1. Form signing for upload > [lambda/form-signing-sts/index.js](lambda/form-signing-sts/index.js) This lambda generates the signature for valid uploads. 
+1. [Upload](backend/form-signing-sts/index.js): this lambda generates the signature for valid uploads. 
 
-1. Browsing > [lambda/browsing/index.js](lambda/browsing/index.js) This lambda retrieves the objects in a path
+1. [Browsing](backend/browsing/index.js): this lambda retrieves the objects in a path
 
-1. Delete > [lambda/delete-keys/index.js](lambda/delete-keys/index.js) This lambda deletes recursively all objects in a path
+1. [Delete](backend/delete-keys/index.js): this lambda deletes recursively all objects in a path
 
-1. Get presigned urls > [lambda/get-presigned-urls/index.js](lambda/get-presigned-urls/index.js) This lambda generate presigned urls for objects to be downloaded safely
+1. [Download](backend/get-presigned-urls/index.js): this lambda generate presigned urls for objects to be downloaded safely
 
-1. Login: in this case SAML based to generate a JWT token.
+1. [Login](backend/login/app.js): in this case SAML based to generate a JWT token.
 
     - Default setup points to samltest.id. [Metadata](/docs/sp-metadata.xml) for samltest.id is generated with [https://www.samltool.com/sp_metadata.php](https://www.samltool.com/sp_metadata.php):
     - In "Attribute Consume Service Endpoint (HTTP-POST)" you have to put your api endpoint:
@@ -69,6 +72,8 @@ Features:
             https://${api gateway id}.execute-api.${region}.amazonaws.com/${stage}/login/callback
 
     - In "entityID" update your issuer (same in environment variable for login handler in serverless.yml)
+
+1. [Custom authorizer](backend/custom-auth/index.js): validates JWT token and adds extra permissions from [CSV](data/permissions.csv)
 
 ## Setup interface
 

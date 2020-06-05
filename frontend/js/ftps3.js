@@ -373,9 +373,6 @@
         settings.currentDir = data.Name + "/" + data.Prefix;
         settings.originalPrefix = data.originalPrefix;
 
-        console.log("current dir " , settings.currentDir)
-        console.log("original Prefix " , settings.originalPrefix)
-
         var isRoot = (settings.currentDir.replace("/","")==="" ? true : false);
     
         if(isRoot){
@@ -582,8 +579,6 @@
     */
     var _generateFormData = function(_fnUpload, file, path, cb){
         //path = settings.currentDir.slice(settings.currentDir.lastIndexOf("/"));// + "/" + path ;
-        console.log(">> " , path)
-        console.log(">> original " , settings.originalPrefix)
         let fd = new FormData();
         let filename = "";
         for(var k in settings.signedFormData){
@@ -591,7 +586,6 @@
                 if(k==="key"){
                     filename = settings.signedFormData[k].replace("${filename}",path+"${filename}");
                     //filename = settings.originalPrefix + "${filename}";
-                    console.log("form data key " , settings.signedFormData[k] , "  > " , filename)
                     fd.append(k, filename);
                 }else{
                     fd.append(k, settings.signedFormData[k]);
