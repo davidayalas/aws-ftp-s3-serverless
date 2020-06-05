@@ -22,9 +22,9 @@ Features:
 
 * Serverless framework: https://www.serverless.com/framework/docs/getting-started/
 * Setup AWS credentials: https://www.serverless.com/framework/docs/providers/aws/cli-reference/config-credentials/
-* Install "serverless-s3-sync" plugin
+* Install all dependencies (give executable permissions to [install-dependencies.sh](install-dependencies.sh))
 
-        $ npm install --save serverless-s3-sync
+        $ sh ./install-dependencies.sh
 
 * Update "serviceName" with your own in [setup.demo.json](https://github.com/davidayalas/aws-ftp-s3-serverless/blob/master/setup.demo.json#L2)
 
@@ -39,6 +39,12 @@ Features:
         $ sls deploy
         $ sls info | grep GET -m 1 | awk -F[/:] '{printf "var endpoint='\''https://"$4"'\'';"}' > frontend/js/endpoint.js
         $ sls s3sync
+
+* Update your [sp-metadata.xml](docs/sp-metadata.xml) with:
+    * your issuer
+    * your api gw endpoint
+
+* Upload this file to https://samltest.id/upload.php
 
 ## Sample interface
 
@@ -62,6 +68,7 @@ Features:
 
             https://${api gateway id}.execute-api.${region}.amazonaws.com/${stage}/login/callback
 
+    - In "entityID" update your issuer (same in environment variable for login handler in serverless.yml)
 
 ## Setup interface
 
@@ -75,9 +82,6 @@ var endpoint = "https://xxxxxxxx.execute-api.eu-west-1.amazonaws.com";
 
 # TODO
 
-* custom auth based on s3 select
-
 * Quotas
 * Sharing
-
-
+* Improve interface, ftps3.js

@@ -7,22 +7,19 @@ const utils = require('../utils');
 const _BUCKET = process.env.BUCKET;
 
 exports.handler = async (event, context) => {
-    let user = null;
-    if(event.requestContext && event.requestContext.authorizer && event.requestContext.authorizer.user){
-        user = event.requestContext.authorizer.user;
-    }
-    console.log(event.requestContext);
-    if(!user){
-        return utils.getResponse("no user, no live", null, 403);
+    const check = utils.checkAuth(event);
+
+    if(check.error){
+       return utils.getResponse(check.error, null, 403);
     }
     
     let keys = null;
 
     if (event.body !== null && event.body !== undefined) {
-        console.log("BODY: " + event.body);
         let body = JSON.parse(event.body);
-        if (body.keys) 
+        if (body.keys){ 
             keys = body.keys;
+        }
     }
     
     if(!keys) {
@@ -31,25 +28,23 @@ exports.handler = async (event, context) => {
 
     await utils.setCredentials(AWS, process.env.ROLE);
    
-    var urls = [];
+    let urls = [];
     const signedUrlExpireSeconds = 60 * 5;
     
     for(let key of keys) {
-        var val = user + '/' + key;
-        
+        //var val = user + '/' + key;
+        let val = utils.adaptKey(event, key, check.user);        
+
         const url = s3.getSignedUrl('getObject', {
             Bucket: _BUCKET,
             Key: val,
             Expires: signedUrlExpireSeconds
-        })
+        });
         
-        console.log("URL: " + url);
         urls.push(url);
     }
     
     var bodyContent = "{\"urls\":" + JSON.stringify(urls) + "}";
-    
-    console.log("BODY CONTENT: " + bodyContent);
     
     return utils.getResponse(null, bodyContent);
 };

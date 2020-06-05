@@ -6,21 +6,12 @@ const utils = require('../utils');
 AWS.config.region = process.env.AWS_REGION || 'eu-west-1';
 AWS.config.signatureVersion = 'v4';
 
-const _BUCKET = process.env.BUCKET;
- 
 exports.handler = async (event, context) => {
 
-    if(!_BUCKET){
-        return utils.getResponse("no bucket", null, 500);
-    }
+    const check = utils.checkAuth(event);
 
-    let user = null;
-    if(event.requestContext && event.requestContext.authorizer && event.requestContext.authorizer.user){
-        user = event.requestContext.authorizer.user;
-    }   
-
-    if(!user){
-        return utils.getResponse("no user, no live", null, 403);
+    if(check.error){
+       return utils.getResponse(check.error, null, 403);
     }
     
     await utils.setCredentials(AWS, process.env.ROLE);
@@ -30,10 +21,10 @@ exports.handler = async (event, context) => {
     const expires = new Date(currentDate.getTime()+(60000*expiresMinutes));
 
     const params = {
-        Bucket: _BUCKET,
+        Bucket: check.bucket,
         Conditions: [
-     	   ["starts-with", "$key", user + "/"],
- 	       {"bucket": _BUCKET},
+     	   ["starts-with", "$key", check.key],
+ 	       {"bucket": check.bucket},
         ],
         Expiration: expires.toISOString()
     };
@@ -47,7 +38,7 @@ exports.handler = async (event, context) => {
           } else {
             let formdata = {};
             formdata.endpoint = data.url;
-            formdata.key = user + '/${filename}';
+            formdata.key = (check.key ? check.key + "/" : "") + '${filename}';
             for(let k in data.fields){
                 formdata[k] = data.fields[k];
             }

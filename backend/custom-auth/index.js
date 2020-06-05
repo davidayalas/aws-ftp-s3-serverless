@@ -28,13 +28,20 @@ async function getPermissions(user){
     return [];
   }
 
-  const permissions = await s3select.query({
+  const permissions = JSON.parse(await s3select.query({
     "Bucket" : _BUCKET, 
     "Key": _FILE, 
     "Expression": `select * from s3object s where s.id='${user}'`,
-  });
+  }));
   
-  return JSON.parse(permissions);
+  let _auth = {};
+  for(let i=0,z=permissions.length;i<z;i++){
+    if(!_auth[permissions[i][1]]){
+      _auth[permissions[i][1]] = [];
+    }
+    _auth[permissions[i][1]].push({folder:permissions[i][2], role: (permissions[i][3] || 'admin')});
+  }
+  return _auth;
 }
   
 /**
@@ -49,18 +56,19 @@ module.exports.handler = async (event, context, callback) => {
   if(!token){
     return ('Unauthorized ', 'No token'); // Return a 401 Unauthorized response
   }
-  try {
+
+  try{
     // Verify JWT
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = decoded["urn:oid:0.9.2342.19200300.100.1.3"];
 
     const permissions = await getPermissions(user);
-    const effect = permissions.length>0 ? "Allow" : "Deny";
-    const authorizerContext = { "user": user, "permissions" : permissions[0][1]};
+    const effect = Object.keys(permissions).length>0 ? "Allow" : "Deny";
+    const authorizerContext = { "user": user, "permissions" : JSON.stringify(permissions)};
     const policyDocument = buildIAMPolicy(user, effect, event.methodArn, authorizerContext);
 
     return (null, policyDocument); 
-  } catch (e) {
+  }catch(e) {
     return ('Unauthorized ', e.message); // Return a 401 Unauthorized response
   }
 }; 

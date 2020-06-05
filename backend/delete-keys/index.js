@@ -4,13 +4,10 @@ const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
 const utils = require('../utils');
 
-const _BUCKET = process.env.BUCKET;
-
-async function deleteFromS3(bucket, path, user) {
-  const prefix = user + '/' + path;
+async function deleteFromS3(bucket, path) {
   const listParams = {
     Bucket: bucket,
-    Prefix: prefix
+    Prefix: path
   };
 
   const listedObjects = await s3.listObjectsV2(listParams).promise();
@@ -32,36 +29,35 @@ async function deleteFromS3(bucket, path, user) {
   }
 }
 
-
 exports.handler = async (event, context) => {
-    let user = null;
-    if(event.requestContext && event.requestContext.authorizer && event.requestContext.authorizer.user){
-        user = event.requestContext.authorizer.user;
-    }
-    
-    if(!user){
-      return utils.getResponse("no user, no live", null, 403);
-    }
-    
-    let keys = null;
+  const check = utils.checkAuth(event, "delete");
 
-    if (event.body !== null && event.body !== undefined) {
-      let body = JSON.parse(event.body);
-      if (body.keys){ 
-          keys = body.keys;
+  if(check.error){
+    return utils.getResponse(check.error, null, 403);
+  }
+  
+  let keys = null;
+
+  if (event.body !== null && event.body !== undefined) {
+    let body = JSON.parse(event.body);
+    if (body.keys){ 
+        keys = body.keys;
+    }
+  }
+  
+  if(!keys) {
+    return utils.getResponse("no keys", null, 400);
+  }
+
+  await utils.setCredentials(AWS, process.env.ROLE);
+
+  await Promise.all(keys.map(async(key) => {
+      const newKey = utils.adaptKey(event, key, check.user);
+      if(newKey){
+        await deleteFromS3(check.bucket, newKey);
       }
-    }
-    
-    if(!keys) {
-      return utils.getResponse("no keys", null, 400);
-    }
+  }));
 
-    await utils.setCredentials(AWS, process.env.ROLE);
-
-    await Promise.all(keys.map(async (key) => {
-        await deleteFromS3(_BUCKET, key, user);
-    }));
-
-    return utils.getResponse(null, "{\"message\" : \"done\"}");
+  return utils.getResponse(null, "{\"message\" : \"done\"}");
     
 };

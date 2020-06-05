@@ -307,7 +307,8 @@
         if(folder){
             uploadData(new File([""], ""),folder+"/",function(){
                 _getKeys("", true);
-            });
+                settings.signedFormData = null;
+            },true);
         }else{
             settings.endLoading();
         }
@@ -363,20 +364,36 @@
     */
     var _drawExplorer = function(data){
         data = JSON.parse(data);
+        var aux;
+        var currentPath = "";
+
         _$(settings.browser_selector).empty();
         _$(settings.browser_selector).append("<table id='"+settings.browser_selector.slice(1)+"-toc'></table>");
         
-        var keyRoot = settings.key_root || ""; //to remove from prefixes and contents due our interaction with our lambdas (and security--> root=user email)
-        var aux;
+        settings.currentDir = data.Name + "/" + data.Prefix;
+        settings.originalPrefix = data.originalPrefix;
 
-        var isRoot = (data.Prefix.replace(keyRoot+"/","")==="" ? true : false);
-        var parent = data.Prefix.slice(0,data.Prefix.length-1);
-        parent = parent.slice(0,parent.lastIndexOf("/")).replace(keyRoot,"").replace("/","");
+        console.log("current dir " , settings.currentDir)
+        console.log("original Prefix " , settings.originalPrefix)
 
-        settings.currentDir = data.Prefix.replace(keyRoot+"/","");
+        var isRoot = (settings.currentDir.replace("/","")==="" ? true : false);
+    
+        if(isRoot){
+            settings.signedFormData = null;
+        }
+
+        var parent = !data.MaxKeys ? "" : data.Name + "/" + data.Prefix.slice(0,data.Prefix.length-1);
+        parent = parent.slice(0,parent.lastIndexOf("/"));
+
+        if(settings.currentDir.indexOf("/")===0){
+            settings.currentDir = settings.currentDir.slice(1);
+        }
 
         if(settings.currentDir!==""){
             var breadcrumbs = settings.currentDir.split("/");
+            if(breadcrumbs[breadcrumbs.length-1]===""){
+                breadcrumbs.pop();
+            }
             var breadcrumbs_items = [];
             var breadcrumbs_path=[];
             for(var i=0,z=breadcrumbs.length;i<z;i++){
@@ -384,7 +401,7 @@
                     continue;
                 }
                 breadcrumbs_path.push(breadcrumbs[i]);
-                breadcrumbs_items.push((i<(z-2)?" <a href='#' onclick='ftps3().getKeys(\""+breadcrumbs_path.join("/")+"\")'>":"")+breadcrumbs[i]+(i<(z-2)?"</a>":""));
+                breadcrumbs_items.push((i<(z-1)?" <a href='#' onclick='ftps3().getKeys(\""+breadcrumbs_path.join("/")+"\")'>":"")+breadcrumbs[i]+(i<(z-1)?"</a>":""));
             }
             _$(settings.browser_selector+"-toc").append("<tr><td class='ftps3-path' colspan='2'><a href='#' onclick='ftps3().getKeys(\"/\")'><i class='fa fa-home'></i></a> <i class='fa fa-angle-right'></i> "+breadcrumbs_items.join(" <i class='fa fa-angle-right'></i> ")+"</td></tr>");
         }else{
@@ -395,20 +412,21 @@
             _$(settings.browser_selector+"-toc").append("<tr><td class='ftps3-parent-folder' colspan='2'><i class='fa fa-folder' aria-hidden='true'></i> <a href='#' onclick='ftps3().getKeys(\""+parent+"\")'>..</a></td></tr>");
         }
 
-        var currentPath = "";
         for(var i=0,z=data.CommonPrefixes.length;i<z;i++){
             aux = data.CommonPrefixes[i].Prefix.replace(data.Prefix,"");
             if(aux.slice(-1)==="/"){
                 aux = aux.slice(0,aux.length-1);
             }
-            currentPath = data.CommonPrefixes[i].Prefix.replace(keyRoot+"/","");
-            _$(settings.browser_selector+"-toc").append("<tr class='ftps3-item-folder'><td colspan='2'><input type='checkbox' value='"+currentPath+"' class='ftps3-action' /> <i class='fa fa-folder' aria-hidden='true'></i> <a href='#' onclick='ftps3().getKeys(\""+settings.currentDir+aux+"\")'>" + aux + "</a></td></tr>");
+            currentPath = data.CommonPrefixes[i].Prefix;
+            if(aux){
+                _$(settings.browser_selector+"-toc").append("<tr class='ftps3-item-folder'><td colspan='2'><input type='checkbox' value='"+data.Name + "/" +currentPath+"' class='ftps3-action' /> <i class='fa fa-folder' aria-hidden='true'></i> <a href='#' onclick='ftps3().getKeys(\""+settings.currentDir+aux+"\")'>" + aux.replace(/\//g,'') + "</a></td></tr>");
+            }
         }
 
         for(var i=0,z=data.Contents.length;i<z;i++){
             aux = data.Contents[i].Key.slice(data.Contents[i].Key.lastIndexOf("/")+1);
             if(aux!==""){
-                _$(settings.browser_selector+"-toc").append("<tr class='ftps3-item-file'><td class='ftps3-item-filename'><input type='checkbox' class='ftps3-action' value='"+data.Contents[i].Key.replace(keyRoot+"/","") + "'/> <i class='fa fa-file' aria-hidden='true'></i> " + aux + "</td><td class='ftps3-item-filesize'>"+ _bytesToSize(data.Contents[i].Size) +"</td><td class='ftps3-item-date'>"+_getDate(data.Contents[i].LastModified)+"</td></tr>");
+                _$(settings.browser_selector+"-toc").append("<tr class='ftps3-item-file'><td class='ftps3-item-filename'><input type='checkbox' class='ftps3-action' value='"+data.Name + "/" + data.Contents[i].Key + "'/> <i class='fa fa-file' aria-hidden='true'></i> " + aux.replace(/\//g,'') + "</td><td class='ftps3-item-filesize'>"+ _bytesToSize(data.Contents[i].Size) +"</td><td class='ftps3-item-date'>"+_getDate(data.Contents[i].LastModified)+"</td></tr>");
             }
         }    
     }
@@ -538,7 +556,7 @@
     * Gets upload signed data from backend --> https://docs.aws.amazon.com/AmazonS3/latest/API/sigv4-post-example.html
     */
     var _getUploadForm = function(callback){
-        _request("GET", settings.endpoint_signedform, function(data){
+        _request("GET", settings.endpoint_signedform +"?path=" + settings.currentDir, function(data){
             settings.signedFormData = JSON.parse(data);
             if(typeof callback==="function"){
                 callback();
@@ -563,12 +581,18 @@
     * Generates form data to send with ajax request
     */
     var _generateFormData = function(_fnUpload, file, path, cb){
-        path = settings.currentDir + path;
-        var fd = new FormData();
+        //path = settings.currentDir.slice(settings.currentDir.lastIndexOf("/"));// + "/" + path ;
+        console.log(">> " , path)
+        console.log(">> original " , settings.originalPrefix)
+        let fd = new FormData();
+        let filename = "";
         for(var k in settings.signedFormData){
             if(["endpoint"].indexOf(k)===-1){
                 if(k==="key"){
-                    fd.append(k, settings.signedFormData[k].replace("/","/"+path));
+                    filename = settings.signedFormData[k].replace("${filename}",path+"${filename}");
+                    //filename = settings.originalPrefix + "${filename}";
+                    console.log("form data key " , settings.signedFormData[k] , "  > " , filename)
+                    fd.append(k, filename);
                 }else{
                     fd.append(k, settings.signedFormData[k]);
                 }
@@ -598,6 +622,7 @@
     }      
 
     var uploadData = function(file, path, cb){
+        //_getUploadForm(function(){_generateFormData(_ajaxUploadPost,file,path,cb)});
         if(!settings.signedFormData){
             _getUploadForm(function(){_generateFormData(_ajaxUploadPost,file,path,cb)});
         }else{

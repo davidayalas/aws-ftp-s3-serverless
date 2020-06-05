@@ -60,6 +60,19 @@ resources:
               AllowedOrigins: 
                 - https://${self:custom.frontBucket}.s3-${self:provider.region}.amazonaws.com
           
+    S3Data2:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.dataBucket}-2
+        CorsConfiguration:
+          CorsRules:
+            - AllowedMethods:
+                - GET
+                - POST
+                - HEAD
+              AllowedOrigins: 
+                - https://${self:custom.frontBucket}.s3-${self:provider.region}.amazonaws.com
+
     S3Front:
       Type: AWS::S3::Bucket
       Properties:
@@ -178,7 +191,7 @@ custom:
       deleteRemoved: true
     - bucketName: ${self:custom.dataBucket} 
       localDir: data
-      deleteRemoved: true
+      #deleteRemoved: true
 
 
 package:
