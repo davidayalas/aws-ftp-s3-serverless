@@ -79,7 +79,7 @@ Features:
 
 Create file "js/endpoint.js" with the following content replacing values with aproppiate. You can generate it from sls info output:
 
-        $   $ sls info | grep GET -m 1 | awk -F[/:] '{printf "var endpoint='\''https://"$4"'\'';"}' > frontend/js/endpoint.js
+        $ sls info | grep GET -m 1 | awk -F[/:] '{printf "var endpoint='\''https://"$4"'\'';"}' > frontend/js/endpoint.js
 
 ```javascript
 var endpoint = "https://xxxxxxxx.execute-api.eu-west-1.amazonaws.com";
