@@ -4,6 +4,6 @@ package-lock.json
 yarn*
 .env
 .serverless
-endpoint.js
+*endpoint.js
 http-server
 *.cert

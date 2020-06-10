@@ -1,1 +1,0 @@
-var endpoint='https://tx2hamdgmd.execute-api.eu-west-1.amazonaws.com';

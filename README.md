@@ -40,7 +40,7 @@ Features:
 * Deploy demo
 
         $ sls deploy
-        $ sls info | grep GET -m 1 | awk -F[/:] '{printf "var endpoint='\''https://"$4"'\'';"}' > frontend/js/endpoint.js
+        $ sls info | grep GET -m 1 | awk -F[/:] '{printf "const endpoint={get(){return '\''https://"$4"/demo/'\'';}};export default endpoint;"}' > frontend/src/assets/js/endpoint.js
         $ sls s3sync
 
 * Update your [sp-metadata.xml](docs/sp-metadata.xml) with:
@@ -77,16 +77,25 @@ Features:
 
 ## Frontend
 
-Create file "js/endpoint.js" with the following content replacing values with aproppiate. You can generate it from sls info output:
+* New frontend is Vue based. Then follow the [Getting Started](https://v1.vuejs.org/guide/installation.html)
 
-        $ sls info | grep GET -m 1 | awk -F[/:] '{printf "var endpoint='\''https://"$4"'\'';"}' > frontend/js/endpoint.js
+* Create file "frontend/src/assets/js/endpoint.js" with the following content replacing values with aproppiate
 
-```javascript
-var endpoint = "https://xxxxxxxx.execute-api.eu-west-1.amazonaws.com";
-```
+    ```javascript
+    const endpoint={
+        get(){
+            return 'https://${your id}.execute-api.${your region}.amazonaws.com/${your stage}/';
+        }
+    };
+        
+    export default endpoint;
+    ```
+
+* Or you can generate it from sls info output:
+
+        $  sls info | grep GET -m 1 | awk -F[/:] '{printf "const endpoint={get(){return '\''https://"$4"/demo/'\'';}};export default endpoint;"}' > frontend/src/assets/js/endpoint.js
 
 # TODO
 
 * Quotas
 * Sharing
-* Improve interface, ftps3.js
