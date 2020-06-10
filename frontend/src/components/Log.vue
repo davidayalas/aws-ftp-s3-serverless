@@ -39,9 +39,9 @@
       });
     },
     watch: { 
-        updates: function(_array) { // watch it
+        updates: function(item) { // watch it
           let _className, logline, loglines;
-          let item = _array[_array.length-1];
+          //let item = _array[_array.length-1];
           switch(item.action){
             case "uploaded":{
               _className = ".ftps3-action-log-"+this.cleanName(item.name);

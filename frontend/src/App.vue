@@ -44,6 +44,28 @@
       padding: 1em;
   }   
 
+  a{
+      position: relative;
+      text-decoration: none;
+      color: blue;
+  }
+
+  a:before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: blue;
+    visibility: hidden;
+    transform: scaleX(0);
+    transition: all 0.3s ease-in-out;
+  }
+  a:hover:before {
+    visibility: visible;
+    transform: scaleX(1);
+  }
   @media (max-width: 600px) {
       #app{
         max-width: 100%;        
@@ -71,7 +93,7 @@
         uploadMsg : "",
         isRoot : true,
         log : [],
-        updates : []
+        updates : {}
       }
     },
     components: {
@@ -102,7 +124,7 @@
               const signedForm = await this.$getRequest(endpoint.get() + "/getuploadform?path="+this.currentDir+"/");
               const formData = this.$generateFormData(signedForm, new File([""], ""), folder+"/");
               await this.$postRequest(signedForm.endpoint, formData);
-              this.updates.push({"name": folder, "action" : "created"});
+              this.updates = {"name": folder, "action" : "created"};
               this.browseControler(this.currentDir, 'default');
             }
             break;
@@ -119,7 +141,7 @@
               const response = await this.$postRequest(endpoint.get() + "/deletekeys", JSON.stringify({"keys" : keys}), true);
               const data = await response.json();
               if(data.message==="done"){
-                this.updates.push({"action" : "deleted"});
+                this.updates = {"action" : "deleted"};
                 this.browseControler(this.currentDir, 'default');
               }else{
                 alert("not authorized")
@@ -140,7 +162,7 @@
               for(let i=0,z=data.urls.length;i<z;i++){
                 logs.push({"name": keys[i], "downloading" : true});
                 await this.$downloadFile(data.urls[i],keys[i]);
-                this.updates.push({"name": keys[i], "action" : "downloaded"});
+                this.updates = {"name": keys[i], "action" : "downloaded"};
               }
             }
             break;
@@ -156,7 +178,7 @@
               this.log.push({"name": files[i].name, "path": path, "uploading" : true});
               formData = this.$generateFormData(signedForm, files[i].binary, path);
               await this.$postRequest(signedForm.endpoint, formData);
-              this.updates.push({"name": files[i].name, "action" : "uploaded"});
+              this.updates = {"name": files[i].name, "action" : "uploaded"};
             }
             this.uploadMsg = "Drag content or click here";
             this.browseControler(this.currentDir, 'default');
@@ -176,7 +198,7 @@
                 alert("not authorized")
                 break;
               }
-              this.updates.push({"name": data[i].name, "action" : "uploaded"});
+              this.updates = {"name": data[i].name, "action" : "uploaded"};
             }
             this.uploadMsg = "Drag content or click here";
             this.browseControler(this.currentDir, 'default');
