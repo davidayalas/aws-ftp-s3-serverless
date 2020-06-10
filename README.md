@@ -37,6 +37,11 @@ Features:
     - IDP_HOST: your idp
     - JWT_SECRET: to sign JWT from SAML and validate from custom authorizer
 
+* Generate frontend distribution
+
+        $ cd frontend
+        $ npm run build
+
 * Deploy demo
 
         $ sls deploy
