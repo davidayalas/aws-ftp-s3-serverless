@@ -16,7 +16,6 @@
         </td>
       </tr>
       <!-- Parent -->
-      <template v-if="!loading">
       <tr v-if="isRoot()">
         <td colspan='4'>
             <a href="#" v-on:click.prevent="sendBrowse(currentDir, 'parent')">..</a>
@@ -27,7 +26,7 @@
         <td class='selector'>
           <input type='checkbox' class='ftps3-action' v-bind:value="currentDir + '/'+cleanKey(item.Prefix, s3data.Prefix)" v-if="isRoot()"/>
         </td>
-        <td colspan='3'>
+        <td colspan='3' class="ftps3-item-folder">
           <i class='fa fa-folder' aria-hidden='true'></i> <a href="#" v-on:click.prevent="sendBrowse(cleanKey(item.Prefix, s3data.Prefix))">{{cleanKey(item.Prefix, s3data.Prefix)}}</a>
         </td>
       </tr>
@@ -44,7 +43,6 @@
           <td class='ftps3-item-date'>{{_getDate(item.LastModified)}}</td>      
         </template>
       </tr>
-      </template>
     </table>
   </div>
 </template>
@@ -66,9 +64,21 @@
   .ftps3-item-filename{
     width: 50%;
   }
-  .ftps3-item-date,.ftps3-item-size{
+  .ftps3-item-date,.ftps3-item-filesize{
     width: 25%;
   }  
+
+  @media (max-width: 600px) {
+    #app{
+      max-width: 100%;        
+    }
+    .ftps3-item-date,.ftps3-item-filesize{
+      display: none;
+    }
+    .ftps3-item-folder,.ftps3-item-filename{
+      width: 98%;
+    }
+  }    
 </style>
 
 <script>

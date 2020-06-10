@@ -1,5 +1,5 @@
 <template>
-  <section id="logginContainer">  
+  <section id="logginContainer" v-if="!logged">  
   <div class="type-1">
       <div>
           <a href="#" id="login" class="btn btn-2" v-on:click.prevent="doLogin()" v-if="!logged">
