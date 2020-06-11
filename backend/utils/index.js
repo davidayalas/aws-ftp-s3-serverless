@@ -183,7 +183,8 @@ exports.adaptKey = function(event, path, user){
         if(i.folder===requestedPath || requestedPath.indexOf(i.folder)===0){
             isAuth = true;
             if(i.role==="user"){
-                requestedPath = requestedPath.split(i.folder).join(i.folder+"/"+user);
+                //requestedPath = requestedPath.split(i.folder).join(i.folder+"/"+user);
+                requestedPath = requestedPath.replace(i.folder, i.folder+"/"+user);
             } 
         }
     });
