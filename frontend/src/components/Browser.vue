@@ -16,15 +16,15 @@
         </td>
       </tr>
       <!-- Parent -->
-      <tr v-if="isRoot()">
+      <tr v-if="!isRoot">
         <td colspan='4'>
-            <a href="#" v-on:click.prevent="sendBrowse(currentDir, 'parent')">..</a>
+            <a href="#" v-on:click.prevent="sendBrowse(currentDir, 'parent')"><i class="fas fa-level-up-alt fa-flip-horizontal" aria-hidden="true"></i></a>
         </td>
       </tr>
       <!-- Folders -->
       <tr v-for="(item, x) in s3data.CommonPrefixes" :key="'pref'+x">
         <td class='selector'>
-          <input type='checkbox' class='ftps3-action' v-bind:value="currentDir + '/'+cleanKey(item.Prefix, s3data.Prefix)" v-if="isRoot()"/>
+          <input type='checkbox' class='ftps3-action' v-bind:value="currentDir + '/'+cleanKey(item.Prefix, s3data.Prefix)" v-if="!isRoot"/>
         </td>
         <td colspan='3' class="ftps3-item-folder">
           <i class='fa fa-folder' aria-hidden='true'></i> <a href="#" v-on:click.prevent="sendBrowse(cleanKey(item.Prefix, s3data.Prefix))">{{cleanKey(item.Prefix, s3data.Prefix)}}</a>
@@ -58,8 +58,8 @@
   #browser, #contents {
     text-align: left;
   }
-  #contents tr td.selector{
-    width: .5em;
+  .selector{
+    width:2%;
   }
   .ftps3-item-filename{
     width: 50%;
@@ -85,7 +85,7 @@
 
   export default {
     name : 'BrowserComponent',
-    props : ['s3data','currentDir', 'loading'],
+    props : ['s3data','currentDir', 'loading', 'isRoot'],
     data() {
       return {
           logged : false,
@@ -119,12 +119,6 @@
           }
         
           return paths;
-        },
-        isRoot() {
-          if(this.currentDir && this.currentDir.replace){
-            return this.currentDir.replace('/','')!=='';
-          }
-          return false;
         },
         _bytesToSize(bytes) {
             const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];

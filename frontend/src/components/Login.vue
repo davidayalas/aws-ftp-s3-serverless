@@ -1,5 +1,5 @@
 <template>
-  <section id="logginContainer" v-if="!logged">  
+  <section id="loginContainer" v-if="!logged">  
   <div class="type-1">
       <div>
           <a href="#" id="login" class="btn btn-2" v-on:click.prevent="doLogin()" v-if="!logged">
@@ -12,14 +12,14 @@
 </template>
 
 <style>
-  #logginContainer .btn-2 {
+  #loginContainer .btn-2 {
       background-color: #00AFD1;
   }
-  #logginContainer .btn-2 .round {
+  #loginContainer .btn-2 .round {
       background-color: #00c4eb;
   }
 
-  #logginContainer a {
+  #loginContainer a {
       text-decoration: none;
       -moz-border-radius: 30px;
       -webkit-border-radius: 30px;
@@ -36,11 +36,18 @@
       transition: all 0.3s;
       display: inline-block;
   }
-  #logginContainer a span {
+
+
+  #loginContainer a:hover:before {
+    visibility: hidden;
+    transition: none;
+  }
+
+  #loginContainer a span {
       position: relative;
       z-index: 3;
   }
-  #logginContainer a .round {
+  #loginContainer a .round {
       -moz-border-radius: 50%;
       -webkit-border-radius: 50%;
       border-radius: 50%;
@@ -55,7 +62,7 @@
       transition: all 0.3s ease-out;
       z-index: 2;
   }
-  #logginContainer a .round i {
+  #loginContainer a .round i {
       position: absolute;
       top: 50%;
       margin-top: -6px;
@@ -67,24 +74,32 @@
       transition: all 0.3s;
   }
 
-  #logginContainer .txt {
-      font-size: 14px;
+  #loginContainer .txt {
+      font-size: .9em;
       line-height: 1.45;
   }
 
-  #logginContainer .type-1 a:hover {
+  #loginContainer .type-1 a:hover {
       padding-left: 48px;
       padding-right: 28px;
   }
-  #logginContainer .type-1 a:hover .round {
+  #loginContainer .type-1 a:hover .round {
       width: calc(100% - 6px);
       -moz-border-radius: 30px;
       -webkit-border-radius: 30px;
       border-radius: 30px;
   }
-  #logginContainer .type-1 a:hover .round i {
+  #loginContainer .type-1 a:hover .round i {
       left: 12%;
   }
+
+  @media (max-width: 600px) {
+    #loginContainer a {
+        font-size: .6em;
+        line-height: 1.45;
+    }
+  }
+
 </style>
 
 <script>
@@ -115,8 +130,6 @@
     const token_ttl=window.localStorage.getItem("token_ttl");
 
     window.addEventListener('message', function(e) {
-      console.log(endpoint.get())
-      console.log(e.origin)
       if(endpoint.get().indexOf(e.origin)!==0){
         return;
       }

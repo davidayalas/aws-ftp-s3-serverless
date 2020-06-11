@@ -2,10 +2,10 @@
   <section v-if="logged && !isRoot"> 
     <div class="log-area" ref="logs">
         <template v-for="item in log">
-            <span :key="item.name" v-if="item.uploading" :class='"ftps3-action-log-"+cleanName(item.name)'><span>Uploading </span> {{item.path}}{{item.name}}</span>
-            <span :key="item.name" v-if="item.deleting" class="ftps3-action-log-deleting"><span>Deleting </span> {{item.name}}</span>
-            <span :key="item.name" v-if="item.downloading" :class='"ftps3-action-log-"+cleanName(item.name)'><span>Downloading </span> {{item.name}}</span>
-            <span :key="item.name" v-if="item.creating" :class='"ftps3-action-log-"+cleanName(item.name)'><span>Creating </span> {{item.path}}/{{item.name}}</span>
+            <span :key="item.name + item.randomKey" v-if="item.uploading" :class='"ftps3-action-log-"+cleanName(item.name)'><span>Uploading </span> {{item.path}}{{item.name}}</span>
+            <span :key="item.name + item.randomKey" v-if="item.deleting" class="ftps3-action-log-deleting"><span>Deleting </span> {{item.name}}</span>
+            <span :key="item.name + item.randomKey" v-if="item.downloading" :class='"ftps3-action-log-"+cleanName(item.name)'><span>Downloading </span> {{item.name}}</span>
+            <span :key="item.name + item.randomKey" v-if="item.creating" :class='"ftps3-action-log-"+cleanName(item.name)'><span>Creating </span> {{item.path}}/{{item.name}}</span>
         </template>
     </div>
   </section>

@@ -7,11 +7,14 @@
 
     <Login @action="actionControler" />
 
-    <Controls @action="actionControler" />
+    <Controls @action="actionControler" 
+              v-bind:isRoot="isRoot"
+    />
 
     <Browser @browse="browseControler" 
              v-bind:s3data="s3data"  
              v-bind:currentDir="currentDir"
+             v-bind:isRoot="isRoot"
              v-bind:loading="loading"   
     />
     <Upload @action="actionControler" 
@@ -66,20 +69,25 @@
     transform: scaleX(0);
     transition: all 0.3s ease-in-out;
   }
+
   a:hover:before {
     visibility: visible;
     transform: scaleX(1);
   }
+
   @media (max-width: 600px) {
-      #app{
-        width: 100%;        
-        max-width: 100%;        
-        margin: 1em .1em;
-        padding: 0;
-      }
-      body{
-        font-size: 1.5em;
-      }
+    #app{
+      width: 100%;        
+      max-width: 100%;        
+      margin: 1em .1em;
+      padding: 0;
+    }
+    body{
+      font-size: 1.5em;
+    }
+    body{
+      font-size: 1.5em;
+    }
   }          
 </style>
 
@@ -183,9 +191,10 @@
             const signedForm = (await this.$getRequest(endpoint.get() + "getuploadform?path="+this.currentDir+"/"));
             let formData;
             let path;
+            const randomKey = Math.random();
             for(let i=0,z=files.length;i<z;i++){
               path = files[i].path.replace(files[i].name,"").slice(1);
-              this.log.push({"name": files[i].name, "path": path, "uploading" : true});
+              this.log.push({"name": files[i].name, "path": path, "uploading" : true, "randomKey" : randomKey});
               formData = this.$generateFormData(signedForm, files[i].binary, path);
               await this.$postRequest(signedForm.endpoint, formData);
               this.updates = {"name": files[i].name, "action" : "uploaded"};

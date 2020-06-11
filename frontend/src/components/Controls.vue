@@ -1,10 +1,10 @@
 <template>
     <div id="actions" v-if="logged">
         <h2 class="pull-left">Hola {{name}}</h2>
-        <a href="#" v-on:click.prevent="sendAction('create')" class="pull-right"><i class="fa fa-plus fa-2x" aria-hidden="true" title="Add folder"></i></a>
-        <a href="#" v-on:click.prevent="sendAction('browse', '')" class="pull-right"><i class="fa fa-sync fa-2x" aria-hidden="true" title="Refresh"></i></a>
-        <a href="#" v-on:click.prevent="sendAction('delete')" class="pull-right"><i class="fa fa-trash fa-2x" aria-hidden="true" title="Delete selected"></i></a>
-        <a href="#" v-on:click.prevent="sendAction('download')" class="pull-right"><i class="fa fa-download fa-2x" aria-hidden="true" title="Download selected"></i></a>
+        <a href="#" v-on:click.prevent="sendAction('create')" v-if="!isRoot" class="pull-right"><i class="fa fa-plus fa-2x" aria-hidden="true" title="Add folder"></i></a>
+        <a href="#" v-on:click.prevent="sendAction('browse', '')" v-if="!isRoot" class="pull-right"><i class="fa fa-sync fa-2x" aria-hidden="true" title="Refresh"></i></a>
+        <a href="#" v-on:click.prevent="sendAction('delete')" v-if="!isRoot" class="pull-right"><i class="fa fa-trash fa-2x" aria-hidden="true" title="Delete selected"></i></a>
+        <a href="#" v-on:click.prevent="sendAction('download')" v-if="!isRoot" class="pull-right"><i class="fa fa-download fa-2x" aria-hidden="true" title="Download selected"></i></a>
     </div>
 </template>
 
@@ -25,9 +25,14 @@
       margin-top: 0;
   }
 
+  #actions a:hover:before {
+    visibility: hidden;
+    transition: none;
+  }
+
   @media (max-width: 600px) {
     #actions a{
-        font-size: .8em;
+        font-size: .7em;
     }
   }
 </style>
@@ -36,6 +41,7 @@
 
   export default {
     name : 'ControlsComponent',
+    props : ['isRoot'],
     data() {
         return {
             logged : false,
