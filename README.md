@@ -8,7 +8,7 @@ Features:
 
 * It's possible to setup "users" and "admins". 
 
-* A **user** adds its username (email from saml response) to the each key. An **admin** can see everything under a bucket or a folder. See [permissions.csv](data/permissions.csv).
+* A **user** adds its username (email from saml response) to each key (uploading, browsing, deleting...) . An **admin** can see everything under a bucket or a folder. See [permissions.csv](data/permissions.csv).
     - In our PoC, it works with SAML-JWT (https://samltest.id for demo purposes) deployed as a lambda (https://github.com/davidayalas/saml-jwt)
     - You need a Custom Authorizer for your API Gateway to validate JWT Token (sample here [backend/custom-auth/index.js](backend/custom-auth/index.js)). 
     - Our [custom authorizer](backend/custom-auth/index.js) queries with S3 Select the CSV and retrieves the permissions for a user and adds the buckets, folders and roles to the context. 
