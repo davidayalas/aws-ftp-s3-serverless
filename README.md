@@ -21,6 +21,11 @@ Features:
 
 * A user can create a folder
 
+## Architecture
+
+![architecture](docs/architecture.png)
+
+
 ## Deployment requirements
 
 * Serverless framework: https://www.serverless.com/framework/docs/getting-started/
