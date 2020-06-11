@@ -18,6 +18,13 @@
     display: flex;
     flex-direction: column-reverse;
   }
+
+  @media (max-width: 600px) {
+    div.log-area{
+      margin: 0 .5em;
+    }
+  }
+
 </style>
 
 <script>
@@ -85,7 +92,7 @@
           .replace(/~/g,"-")
           .replace(/\s/g,"-")
           .replace(/\//g,"-")
-          .replace(/[()[]]/g,"-")
+          .replace(/\[|\(|\)|\[|\]/g,"-")
           ;
       }
     }

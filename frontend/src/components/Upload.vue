@@ -7,7 +7,8 @@
   >
     <h1 ref="uploadDialog">Drag content or click here</h1>
     <input type="file" name="file" ref="uploadFile" multiple style="display:none" v-on:change="change" />    
-    <input type="file" name="file" ref="uploadFolder" webkitdirectory multiple style="display:none" v-on:change="change" />  </div>
+    <!--input type="file" name="file" ref="uploadFolder" webkitdirectory multiple style="display:none" v-on:change="change" /--> 
+ </div>
 </template>
 
 <style>
@@ -15,17 +16,17 @@
     border: 2px solid #ccc;
     border-radius: 15px;
     margin-top: 1em;
-  }
-
-  #upload-area{
     text-align: center;
     border: 2px dotted #ccc;
   }
 
   @media (max-width: 600px) {
     h1{
-    font-size:1.1em;
+      font-size:1.1em;
     }  
+    #upload-area{
+      margin: 0 .5em;
+    }
   }
 </style>
 

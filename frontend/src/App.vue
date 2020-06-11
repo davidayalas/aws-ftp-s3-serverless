@@ -28,6 +28,10 @@
 </template>
 
 <style>
+  body {
+    margin: 0;
+    padding: 0;
+  }
   #app {
     font-family: Avenir, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -68,7 +72,13 @@
   }
   @media (max-width: 600px) {
       #app{
+        width: 100%;        
         max-width: 100%;        
+        margin: 1em .1em;
+        padding: 0;
+      }
+      body{
+        font-size: 1.5em;
       }
   }          
 </style>
@@ -121,7 +131,7 @@
             var folder = prompt("Folder name", "folder");
             if(folder){
               this.log.push({"name": folder, "path": this.currentDir, "creating" : true});
-              const signedForm = await this.$getRequest(endpoint.get() + "/getuploadform?path="+this.currentDir+"/");
+              const signedForm = await this.$getRequest(endpoint.get() + "getuploadform?path="+this.currentDir+"/");
               const formData = this.$generateFormData(signedForm, new File([""], ""), folder+"/");
               await this.$postRequest(signedForm.endpoint, formData);
               this.updates = {"name": folder, "action" : "created"};
@@ -138,7 +148,7 @@
               logs.push({"name": item.value, "deleting" : true});
             });
             if(keys.length>0 && window.confirm("Sure?")){
-              const response = await this.$postRequest(endpoint.get() + "/deletekeys", JSON.stringify({"keys" : keys}), true);
+              const response = await this.$postRequest(endpoint.get() + "deletekeys", JSON.stringify({"keys" : keys}), true);
               const data = await response.json();
               if(data.message==="done"){
                 this.updates = {"action" : "deleted"};
@@ -157,7 +167,7 @@
               keys.push(item.value);
             });
             if(keys.length>0){
-              const response = await this.$postRequest(endpoint.get() + "/getpresignedurls", JSON.stringify({"keys" : keys}), true);
+              const response = await this.$postRequest(endpoint.get() + "getpresignedurls", JSON.stringify({"keys" : keys}), true);
               const data = await response.json();
               for(let i=0,z=data.urls.length;i<z;i++){
                 logs.push({"name": keys[i], "downloading" : true});
@@ -170,7 +180,7 @@
 
           case "upload": {
             const files = await this.$traverseFileTree(data.items);
-            const signedForm = (await this.$getRequest(endpoint.get() + "/getuploadform?path="+this.currentDir+"/"));
+            const signedForm = (await this.$getRequest(endpoint.get() + "getuploadform?path="+this.currentDir+"/"));
             let formData;
             let path;
             for(let i=0,z=files.length;i<z;i++){
@@ -187,18 +197,24 @@
 
           case "uploadFiles": {
             this.uploadMsg = "Uploading...";
-            const signedForm = (await this.$getRequest(endpoint.get() + "/getuploadform?path="+this.currentDir+"/"));
+            const signedForm = (await this.$getRequest(endpoint.get() + "getuploadform?path="+this.currentDir+"/"));
             let formData;
             let path;
+            let error;
             for (var i=0; i<data.length; i++) {
+              error = null;
               this.log.push({"name": data[i].name, "path": path, "uploading" : true});
               path = data[i].webkitRelativePath.replace(data[i].name,"");
               formData = this.$generateFormData(signedForm, data[i], path);
-              if(!(await this.$postRequest(signedForm.endpoint, formData)).ok){
-                alert("not authorized")
-                break;
+              if(!signedForm.endpoint || !(await this.$postRequest(signedForm.endpoint, formData)).ok){
+                alert("not authorized");
+                error = "auth";
               }
               this.updates = {"name": data[i].name, "action" : "uploaded"};
+              if(error){
+                this.loading = false;
+                break;
+              }
             }
             this.uploadMsg = "Drag content or click here";
             this.browseControler(this.currentDir, 'default');
@@ -229,7 +245,7 @@
             this.currentDir = path;
         }
         this.checkIfRoot();
-        this.s3data = await this.$getRequest(endpoint.get() + "/getfiles?path="+this.$trimSlash(this.currentDir));
+        this.s3data = await this.$getRequest(endpoint.get() + "getfiles?path="+this.$trimSlash(this.currentDir));
         this.loading = false;
       } 
     }

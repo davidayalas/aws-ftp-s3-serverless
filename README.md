@@ -2,7 +2,7 @@
 
 The goal of this project is to provide a space for users under AWS S3 buckets (shared S3 buckets with a "folder" for every user), with a web interface to upload, browse, download and remove files.
 
-This PoC is done between [asamo7](https://github.com/asamo7) and [davidayalas](https://github.com/davidayalas).
+This PoC has been done between [asamo7](https://github.com/asamo7) and [davidayalas](https://github.com/davidayalas).
 
 Features:
 
@@ -51,8 +51,11 @@ Features:
 * Update your [sp-metadata.xml](docs/sp-metadata.xml) with:
     * your issuer
     * your api gw endpoint
+    * your api gw stage
 
 * Upload this file to https://samltest.id/upload.php
+
+* We've detected that sometimes we have to make a manual implementation (with no updates) cdof the API GW once implemented with serverless. 
 
 ## Sample interface
 

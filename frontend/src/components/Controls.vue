@@ -24,6 +24,12 @@
   #actions h2{
       margin-top: 0;
   }
+
+  @media (max-width: 600px) {
+    #actions a{
+        font-size: .8em;
+    }
+  }
 </style>
 
 <script>
