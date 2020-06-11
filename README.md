@@ -23,7 +23,7 @@ Features:
 
 ## Architecture
 
-![architecture](docs/architecture.png)
+![architecture](docs/architecture.png) 
 
 ## Deployment requirements
 
