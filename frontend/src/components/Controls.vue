@@ -34,6 +34,10 @@
     #actions a{
         font-size: .7em;
     }
+    #actions h2.pull-left, #actions a.pull-right{
+        float: none;
+        width: 100%;
+    }
   }
 </style>
 

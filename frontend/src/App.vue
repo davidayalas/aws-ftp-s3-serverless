@@ -50,7 +50,7 @@
 
   div{
       display: block;
-      margin: auto;
+      /*margin: auto;*/
       padding: 1em;
   }   
 
@@ -80,16 +80,17 @@
 
   @media (max-width: 600px) {
     #app{
-      width: 100%;        
-      max-width: 100%;        
-      margin: 1em .1em;
+      width: 99%;    
+      max-width: 99%;
+      display: block;
+      margin: 1em 0em;
       padding: 0;
     }
     body{
-      font-size: 1.5em;
+      font-size: 1.2em;
     }
-    body{
-      font-size: 1.5em;
+    div{
+      padding: 0;
     }
   }          
 </style>

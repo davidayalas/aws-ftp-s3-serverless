@@ -78,6 +78,10 @@
     .ftps3-item-folder,.ftps3-item-filename{
       width: 98%;
     }
+    #browser{
+      margin-top: 1em;
+      padding-left: .5em;
+    }    
   }    
 </style>
 

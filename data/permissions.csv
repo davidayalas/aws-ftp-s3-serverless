@@ -1,7 +1,7 @@
 id,bucket,folder,role
 rsanchez@samltest.id,ftp-serverless-data,00001,user
 rsanchez@samltest.id,ftp-serverless-data,00002,user
-rsanchez@samltest.id,ftp-serverless-data-2,00001,user
+rsanchez@samltest.id,ftp-serverless-data-2,00001/sub_00001,user
 msmith@samltest.id,ftp-serverless-data,00001,user
 scooper@samltest.id,ftp-serverless-data,00001,admin
 scooper@samltest.id,ftp-serverless-data-2,,admin

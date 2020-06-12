@@ -25,7 +25,8 @@
       font-size:1.1em;
     }  
     #upload-area{
-      margin: 0 .5em;
+      margin: 1em .5em;
+      padding: 1em;
     }
   }
 </style>
