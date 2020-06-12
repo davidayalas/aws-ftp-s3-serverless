@@ -1,11 +1,11 @@
 <template>
-  <section> 
-  <div id="loader" class="loading" v-if="loading">Loading&#8230;</div>
-  <div id="message">
-    <div>
-      <p class="message"></p>
+  <section v-if="logged"> 
+    <div id="loader" class="loading" v-if="loading">Loading&#8230;</div>
+    <div id="message">
+      <div>
+        <p class="message"></p>
+      </div>
     </div>
-  </div>
   </section>
 </template>
 
@@ -157,7 +157,7 @@
 <script>
 
   export default {
-  name : 'MessagesComponent',
-  props : ['loading','message']
+    name : 'MessagesComponent',
+    props : ['loading','message','logged']
   }
 </script>

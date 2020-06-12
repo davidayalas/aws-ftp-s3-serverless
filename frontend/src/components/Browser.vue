@@ -17,7 +17,9 @@
       </tr>
       <!-- Parent -->
       <tr v-if="!isRoot">
-        <td colspan='4'>
+        <td class="selector">
+        </td>
+        <td colspan='3'>
             <a href="#" v-on:click.prevent="sendBrowse(currentDir, 'parent')"><i class="fas fa-level-up-alt fa-flip-horizontal" aria-hidden="true"></i></a>
         </td>
       </tr>
@@ -67,7 +69,9 @@
   .ftps3-item-date,.ftps3-item-filesize{
     width: 25%;
   }  
-
+  .fa-home, .fa-level-up-alt{
+    font-size: 1.3em;
+  } 
   @media (max-width: 600px) {
     #app{
       max-width: 100%;        
@@ -89,19 +93,7 @@
 
   export default {
     name : 'BrowserComponent',
-    props : ['s3data','currentDir', 'loading', 'isRoot', 'isRootForUser'],
-    data() {
-      return {
-          logged : false,
-      }
-    },
-    created() {
-      this.$root.$on("logged", (name) => {
-          if(name){
-              this.logged = true;
-          }
-      });
-    },
+    props : ['s3data','currentDir', 'loading', 'isRoot', 'isRootForUser', 'logged'],
     methods: {
         sendBrowse(path='', route='forward') {
           this.$emit('browse', path, route);

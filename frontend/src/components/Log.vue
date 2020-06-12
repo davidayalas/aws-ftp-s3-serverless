@@ -31,19 +31,11 @@
  
   export default {
     name : 'LogComponent',
-    props : ['log', 'updates', 'isRoot'],
+    props : ['log', 'updates', 'isRoot', 'logged'],
     data() {
       return {
-          logged : false,
           localUpdates : []
       }
-    },
-    created() {
-      this.$root.$on("logged", (name) => {
-          if(name){
-              this.logged = true;
-          }
-      });
     },
     watch: { 
         updates: function(item) { // watch it

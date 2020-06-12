@@ -1,5 +1,5 @@
 <template>
-  <section id="loginContainer" v-if="!logged">  
+  <section id="loginContainer" v-if="!logged">  {{logged}}
   <div class="type-1">
       <div>
           <a href="#" id="login" class="btn btn-2" v-on:click.prevent="doLogin()" v-if="!logged">
@@ -120,11 +120,7 @@
 
   export default {
   name : 'LoginComponent',
-  data() {
-    return {
-        logged : false
-    }
-  },
+  props : ['logged'],
   mounted: function () {
     const that = this;
     const token_ttl=window.localStorage.getItem("token_ttl");
@@ -168,8 +164,7 @@
       }  
     },
     emitLogged(name) {
-      this.$root.$emit("logged", name);
-      this.logged = name!==null ? true : false;
+      this.$emit("logged", {"logged": true, "name": name});
       this.$emit('action', 'browse');
     }
   }

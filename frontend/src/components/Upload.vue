@@ -35,19 +35,7 @@
 
   export default {
   name : 'ControlsComponent',
-  props : ['isRoot','uploadMsg'],
-  data() {
-    return {
-      logged : false
-    }
-  },
-  created() {
-    this.$root.$on("logged", (name) => {
-      if(name){
-        this.logged = true;
-      }
-    })
-  },
+  props : ['isRoot','uploadMsg', 'logged'],
   watch: { 
     uploadMsg: function(msg) { 
       this.uploadMessage(msg);

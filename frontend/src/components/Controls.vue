@@ -1,6 +1,6 @@
 <template>
     <div id="actions" v-if="logged">
-        <h2 class="pull-left">Hola {{name}}</h2>
+        <h2 class="pull-left">Hola {{userName}}</h2>
         <a href="#" v-on:click.prevent="sendAction('create')" v-if="!isRoot && !isRootForUser" class="pull-right"><i class="fa fa-plus fa-2x" aria-hidden="true" title="Add folder"></i></a>
         <a href="#" v-on:click.prevent="sendAction('browse', '')" v-if="!isRoot && !isRootForUser" class="pull-right"><i class="fa fa-sync fa-2x" aria-hidden="true" title="Refresh"></i></a>
         <a href="#" v-on:click.prevent="sendAction('delete')" v-if="!isRoot && !isRootForUser" class="pull-right"><i class="fa fa-trash fa-2x" aria-hidden="true" title="Delete selected"></i></a>
@@ -45,21 +45,7 @@
 
   export default {
     name : 'ControlsComponent',
-    props : ['isRoot','isRootForUser'],
-    data() {
-        return {
-            logged : false,
-            name : ""
-        }
-    },
-    created() {
-        this.$root.$on("logged", (name) => {
-            if(name){
-                this.logged = true;
-                this.name = name;
-            }
-        })
-    },
+    props : ['isRoot','isRootForUser', 'userName', 'logged'],
     methods: {
         sendAction(action, data){
             this.$emit('action', action, data);

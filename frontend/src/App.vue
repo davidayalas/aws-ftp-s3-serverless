@@ -3,13 +3,19 @@
 
     <Messages v-bind:loading="loading"  
               v-bind:message="message" 
+              v-bind:logged="logged"
     />
 
-    <Login @action="actionControler" />
+    <Login @action="actionControler" 
+           @logged="setLogged"
+           v-bind:logged="logged"
+    />
 
     <Controls @action="actionControler" 
               v-bind:isRoot="isRoot"
               v-bind:isRootForUser="isRootForUser"
+              v-bind:userName="userName"
+              v-bind:logged="logged"
     />
 
     <Browser @browse="browseControler" 
@@ -18,16 +24,19 @@
              v-bind:isRoot="isRoot"
              v-bind:loading="loading"   
              v-bind:isRootForUser="isRootForUser"
+             v-bind:logged="logged"
     />
 
     <Upload @action="actionControler" 
             v-bind:isRoot="isRoot"
             v-bind:uploadMsg="uploadMsg"
+            v-bind:logged="logged"
     />
 
     <Log v-bind:log="log" 
          v-bind:updates="updates" 
          v-bind:isRoot="isRoot"
+         v-bind:logged="logged"
     />
 
   </div>
@@ -116,7 +125,9 @@
         isRoot : true,
         isRootForUser : true,
         log : [],
-        updates : {}
+        logged : false,
+        updates : {},
+        userName : ""
       }
     },
     components: {
@@ -131,8 +142,22 @@
       checkIfRoot() {
           this.isRoot = this.currentDir==="" ? true : false;
       },
+      setLogged(data) {
+        this.userName = data.name || null;
+        this.logged = data.logged;
+      },
+      isValidToken() {
+        if(!window.localStorage.getItem("token") || (((+new Date()/1000)+60)>window.localStorage.getItem("token_ttl"))){
+          return false;
+        }
+        return true;
+      },
       async actionControler(action, data) {
         this.loading = true;
+        if(!this.isValidToken()){
+          this.setLogged({logged:false});
+          this.loading = false;
+        }
         //action to do
         switch(action){
           case "browse": {
@@ -210,7 +235,6 @@
           }
 
           case "uploadFiles": {
-            console.log("uploadFiles")
             this.uploadMsg = "Uploading...";
             const signedForm = (await this.$getRequest(endpoint.get() + "getuploadform?path="+this.currentDir+"/"));
             let formData;
@@ -237,6 +261,10 @@
       },
       async browseControler(path='', route='forward') {
         this.loading = true;
+        if(!this.isValidToken()){
+          this.setLogged(false);
+          this.loading = false;
+        }
         //path management
         switch(route){
           case 'forward':
