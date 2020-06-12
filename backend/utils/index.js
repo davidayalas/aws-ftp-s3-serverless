@@ -133,7 +133,8 @@ exports.checkAuth = function(event, action){
                     CommonPrefixes : permissions[path].map(function(i){return i.folder ? {Prefix: i.folder + "/"} : {Prefix : ""}}),
                     Contents : [],
                     Prefix : "",
-                    Name : path 
+                    Name : path,
+                    isRootForUser : true
                 }
             }
         }
@@ -152,11 +153,12 @@ exports.checkAuth = function(event, action){
             }else if(i.folder===requestedPath || requestedPath.indexOf(i.folder)===0){
                 isAuth = true;
                 if(i.role==="user"){
-                    requestedPath = requestedPath.split(i.folder).join(i.folder+"/"+user);
+                    //requestedPath = requestedPath.split(i.folder).join(i.folder+"/"+user);
+                    requestedPath = requestedPath.replace(i.folder, i.folder+"/"+user);
                 } 
             }
         });
-        console.log("isAdmin ", isAdmin(permissions[path[0]],requestedPath), " ", permissions[path[0]], " ", requestedPath)
+        //console.log("isAdmin ", isAdmin(permissions[path[0]],requestedPath), " ", permissions[path[0]], " ", requestedPath)
         return {
             ...isAuth && {"bucket" : path[0]},
             ...isAuth && {"key" : requestedPath},
@@ -180,6 +182,7 @@ exports.adaptKey = function(event, path, user){
     let requestedPath = path.slice(1).join("/");
     let isAuth = false;
     permissions[path[0]].map(function(i){
+        i.folder = _removeDoubleSlash(_trimSlash(i.folder));
         if(i.folder===requestedPath || requestedPath.indexOf(i.folder)===0){
             isAuth = true;
             if(i.role==="user"){

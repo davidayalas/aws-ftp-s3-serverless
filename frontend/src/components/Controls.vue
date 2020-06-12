@@ -1,10 +1,10 @@
 <template>
     <div id="actions" v-if="logged">
         <h2 class="pull-left">Hola {{name}}</h2>
-        <a href="#" v-on:click.prevent="sendAction('create')" v-if="!isRoot" class="pull-right"><i class="fa fa-plus fa-2x" aria-hidden="true" title="Add folder"></i></a>
-        <a href="#" v-on:click.prevent="sendAction('browse', '')" v-if="!isRoot" class="pull-right"><i class="fa fa-sync fa-2x" aria-hidden="true" title="Refresh"></i></a>
-        <a href="#" v-on:click.prevent="sendAction('delete')" v-if="!isRoot" class="pull-right"><i class="fa fa-trash fa-2x" aria-hidden="true" title="Delete selected"></i></a>
-        <a href="#" v-on:click.prevent="sendAction('download')" v-if="!isRoot" class="pull-right"><i class="fa fa-download fa-2x" aria-hidden="true" title="Download selected"></i></a>
+        <a href="#" v-on:click.prevent="sendAction('create')" v-if="!isRoot && !isRootForUser" class="pull-right"><i class="fa fa-plus fa-2x" aria-hidden="true" title="Add folder"></i></a>
+        <a href="#" v-on:click.prevent="sendAction('browse', '')" v-if="!isRoot && !isRootForUser" class="pull-right"><i class="fa fa-sync fa-2x" aria-hidden="true" title="Refresh"></i></a>
+        <a href="#" v-on:click.prevent="sendAction('delete')" v-if="!isRoot && !isRootForUser" class="pull-right"><i class="fa fa-trash fa-2x" aria-hidden="true" title="Delete selected"></i></a>
+        <a href="#" v-on:click.prevent="sendAction('download')" v-if="!isRoot && !isRootForUser" class="pull-right"><i class="fa fa-download fa-2x" aria-hidden="true" title="Download selected"></i></a>
     </div>
 </template>
 
@@ -41,7 +41,7 @@
 
   export default {
     name : 'ControlsComponent',
-    props : ['isRoot'],
+    props : ['isRoot','isRootForUser'],
     data() {
         return {
             logged : false,

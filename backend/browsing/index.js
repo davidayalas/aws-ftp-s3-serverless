@@ -33,7 +33,7 @@ exports.handler = async (event, context) => {
 
     const data = await s3.listObjectsV2(params).promise();
 
-    data.originalPrefix = data.Prefix;
+    //data.originalPrefix = data.Prefix;
     if(check.user){
         for(let i=0,z=data.Contents.length;i<z;i++){
             data.Contents[i].Key = utils.removeDoubleSlash(data.Contents[i].Key.replace(check.user+"/",""));

@@ -9,6 +9,7 @@
 
     <Controls @action="actionControler" 
               v-bind:isRoot="isRoot"
+              v-bind:isRootForUser="isRootForUser"
     />
 
     <Browser @browse="browseControler" 
@@ -16,7 +17,9 @@
              v-bind:currentDir="currentDir"
              v-bind:isRoot="isRoot"
              v-bind:loading="loading"   
+             v-bind:isRootForUser="isRootForUser"
     />
+
     <Upload @action="actionControler" 
             v-bind:isRoot="isRoot"
             v-bind:uploadMsg="uploadMsg"
@@ -110,6 +113,7 @@
         message : "",
         uploadMsg : "",
         isRoot : true,
+        isRootForUser : true,
         log : [],
         updates : {}
       }
@@ -162,7 +166,7 @@
                 this.updates = {"action" : "deleted"};
                 this.browseControler(this.currentDir, 'default');
               }else{
-                alert("not authorized")
+                //alert("not authorized")
               }
             }
             break;
@@ -205,25 +209,22 @@
           }
 
           case "uploadFiles": {
+            console.log("uploadFiles")
             this.uploadMsg = "Uploading...";
             const signedForm = (await this.$getRequest(endpoint.get() + "getuploadform?path="+this.currentDir+"/"));
             let formData;
             let path;
-            let error;
+            const randomKey = Math.random();
+            if(signedForm.error){
+              this.uploadMsg = "Drag content or click here";
+              break;
+            }
             for (var i=0; i<data.length; i++) {
-              error = null;
-              this.log.push({"name": data[i].name, "path": path, "uploading" : true});
               path = data[i].webkitRelativePath.replace(data[i].name,"");
+              this.log.push({"name": data[i].name, "path": path, "uploading" : true, "randomKey" : randomKey});
               formData = this.$generateFormData(signedForm, data[i], path);
-              if(!signedForm.endpoint || !(await this.$postRequest(signedForm.endpoint, formData)).ok){
-                alert("not authorized");
-                error = "auth";
-              }
+              await this.$postRequest(signedForm.endpoint, formData);
               this.updates = {"name": data[i].name, "action" : "uploaded"};
-              if(error){
-                this.loading = false;
-                break;
-              }
             }
             this.uploadMsg = "Drag content or click here";
             this.browseControler(this.currentDir, 'default');
@@ -255,6 +256,7 @@
         }
         this.checkIfRoot();
         this.s3data = await this.$getRequest(endpoint.get() + "getfiles?path="+this.$trimSlash(this.currentDir));
+        this.isRootForUser = this.s3data.isRootForUser || false;
         this.loading = false;
       } 
     }

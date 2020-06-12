@@ -24,7 +24,7 @@
       <!-- Folders -->
       <tr v-for="(item, x) in s3data.CommonPrefixes" :key="'pref'+x">
         <td class='selector'>
-          <input type='checkbox' class='ftps3-action' v-bind:value="currentDir + '/'+cleanKey(item.Prefix, s3data.Prefix)" v-if="!isRoot"/>
+          <input type='checkbox' class='ftps3-action' v-bind:value="currentDir + '/'+cleanKey(item.Prefix, s3data.Prefix)" v-if="!isRoot && !isRootForUser"/>
         </td>
         <td colspan='3' class="ftps3-item-folder">
           <i class='fa fa-folder' aria-hidden='true'></i> <a href="#" v-on:click.prevent="sendBrowse(cleanKey(item.Prefix, s3data.Prefix))">{{cleanKey(item.Prefix, s3data.Prefix)}}</a>
@@ -85,7 +85,7 @@
 
   export default {
     name : 'BrowserComponent',
-    props : ['s3data','currentDir', 'loading', 'isRoot'],
+    props : ['s3data','currentDir', 'loading', 'isRoot', 'isRootForUser'],
     data() {
       return {
           logged : false,
