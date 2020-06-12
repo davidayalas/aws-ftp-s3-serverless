@@ -5,7 +5,7 @@
     v-on:drop.stop.prevent="drop"
     v-on:click="click"
   >
-    <h1 ref="uploadDialog">Drag content or click here</h1>{{isRootForUser}}
+    <h1 ref="uploadDialog">Drag content or click here</h1>
     <input type="file" name="file" ref="uploadFile" multiple style="display:none" v-on:change="change" />    
     <!--input type="file" name="file" ref="uploadFolder" webkitdirectory multiple style="display:none" v-on:change="change" /--> 
  </div>
