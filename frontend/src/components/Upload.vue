@@ -1,11 +1,11 @@
 <template>
-  <div id="upload-area" v-if="logged && !isRoot"
+  <div id="upload-area" v-if="logged && !isRoot && !isRootForUser"
     v-on:dragover.stop.prevent="uploadMessage('Upload')"
     v-on:dragleave.stop.prevent="uploadMessage('Drag content or click here')"
     v-on:drop.stop.prevent="drop"
     v-on:click="click"
   >
-    <h1 ref="uploadDialog">Drag content or click here</h1>
+    <h1 ref="uploadDialog">Drag content or click here</h1>{{isRootForUser}}
     <input type="file" name="file" ref="uploadFile" multiple style="display:none" v-on:change="change" />    
     <!--input type="file" name="file" ref="uploadFolder" webkitdirectory multiple style="display:none" v-on:change="change" /--> 
  </div>
@@ -35,7 +35,7 @@
 
   export default {
   name : 'ControlsComponent',
-  props : ['isRoot','uploadMsg', 'logged'],
+  props : ['isRoot','uploadMsg', 'logged', 'isRootForUser'],
   watch: { 
     uploadMsg: function(msg) { 
       this.uploadMessage(msg);

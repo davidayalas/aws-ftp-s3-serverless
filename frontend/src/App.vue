@@ -31,6 +31,7 @@
             v-bind:isRoot="isRoot"
             v-bind:uploadMsg="uploadMsg"
             v-bind:logged="logged"
+            v-bind:isRootForUser="isRootForUser"
     />
 
     <Log v-bind:log="log" 
