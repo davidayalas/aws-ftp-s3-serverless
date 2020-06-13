@@ -36,9 +36,12 @@ Features:
 
         $ chmod +x first-deploy.sh && sh first-deploy.sh
 
-* It will modify and upload some files in order to make all work. If SAML login doesn't work, upload manually [docs/sp-metadata.xml](docs/sp-metadata.xml) to https://samltest.id/upload.php
+* It will modify some files in order to make all work. Go to https://samltest.id/upload.php and upload manually [docs/sp-metadata.xml](docs/sp-metadata.xml). 
 
-  
+* Run your server and try
+
+        $ npm run serve --prefix=frontend
+
 ## Deployment details
 
 * Install all dependencies

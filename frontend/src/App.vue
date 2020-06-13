@@ -162,7 +162,7 @@
         //action to do
         switch(action){
           case "browse": {
-            this.s3data = this.browseControler(data, 'forward');
+            this.browseControler(data, 'forward');
             break;
           }
           

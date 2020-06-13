@@ -35,6 +35,11 @@ async function main(){
     const stage = "demo";
     const api_id = await execShellCommand("sls info | grep GET -m 1 | awk -F[/:] '{printf \$4}'");
 
+    if(!api_id){
+      console.log("Review your AWS Credentials");
+      return;
+    }
+
     //endpoint.js
     let sampleEndpoint = fs.readFileSync(_frontendEndpointFolder+"sample-endpoint.js", 'utf8');
     sampleEndpoint = sampleEndpoint.replace("{api_id}",api_id).replace("{stage}",stage);
@@ -43,8 +48,7 @@ async function main(){
 
     //sp-metadata.xml
     let metadataFile = fs.readFileSync(_spMetadataFolder+"sample-sp-metadata.xml", 'utf8');
-    console.log("saml-jwt-"+serviceName+"-test")
-    metadataFile = metadataFile.replace("{api_id}",api_id).replace("{stage}",stage).replace("{issuer}",serviceName+"-test");
+    metadataFile = metadataFile.replace("{api_id}",api_id).replace("{stage}",stage).replace("{issuer}",serviceName);
     fs.writeFileSync(_spMetadataFolder+"sp-metadata.xml",metadataFile);
     if((await execShellCommand("curl -F userfile=@docs/sp-metadata.xml https://samltest.id/upload.php")).indexOf("successfully")>-1){
       console.log(_spMetadataFolder+"sp-metadata.xml uploaded successfully to samltest.id");
