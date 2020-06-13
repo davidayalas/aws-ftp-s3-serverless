@@ -24,18 +24,33 @@ Features:
 ## Architecture
 
 ![architecture](docs/architecture.png) 
- 
-## Deployment requirements
 
-* Serverless framework: https://www.serverless.com/framework/docs/getting-started/
+## Quick deploy
+
+* Install serverless framework: https://www.serverless.com/framework/docs/getting-started/
+
 * Setup AWS credentials: https://www.serverless.com/framework/docs/providers/aws/cli-reference/config-credentials/
-* Install all dependencies (give executable permissions to [install-dependencies.sh](install-dependencies.sh))
 
-        $ sh ./install-dependencies.sh
+* Update "serviceName" with your own in [setup.demo.json](https://github.com/davidayalas/aws-ftp-s3-serverless/blob/master/setup.demo.json#L2)
+* Execute [first-deploy.sh](first-deploy.sh) (give it executable permissions)
+
+        $ sh first-deploy.sh
+
+* It will modify and upload some files in order to make all work. If SAML login doesn't work, upload manually [docs/sp-metadata.xml](docs/sp-metadata.xml) to https://samltest.id/upload.php
+
+  
+## Deployment details
+
+* Install all dependencies
+
+        $ npm install serverless-s3-sync
+        $ npm --prefix ./backend/custom-auth install ./backend/custom-auth
+        $ npm --prefix ./backend/login install ./backend/login
+        $ npm --prefix ./frontend install ./frontend
 
 * Update "serviceName" with your own in [setup.demo.json](https://github.com/davidayalas/aws-ftp-s3-serverless/blob/master/setup.demo.json#L2)
 
-* Basic env variables:
+* Basic env variables for SAML (your own, because demo is setup):
 
     - SAML_CERT: you idp saml certificate as string
     - IDP_HOST: your idp
@@ -52,14 +67,12 @@ Features:
         $ sls info | grep GET -m 1 | awk -F[/:] '{printf "const endpoint={get(){return '\''https://"$4"/demo/'\'';}};export default endpoint;"}' > frontend/src/assets/js/endpoint.js
         $ sls s3sync
 
-* Update your [sp-metadata.xml](docs/sp-metadata.xml) with:
+* Update your [sp-metadata.xml](docs/sample-sp-metadata.xml) with:
     * your issuer
     * your api gw endpoint
     * your api gw stage
 
 * Upload this file to https://samltest.id/upload.php
-
-* We've detected that sometimes we have to make a manual implementation (with no updates) cdof the API GW once implemented with serverless. 
 
 ## Sample interface
 
@@ -96,7 +109,7 @@ Features:
     ```javascript
     const endpoint={
         get(){
-            return 'https://${your id}.execute-api.${your region}.amazonaws.com/${your stage}/';
+            return 'https://${your api id}/${your stage}/';
         }
     };
         
