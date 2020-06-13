@@ -34,7 +34,7 @@ Features:
 * Update "serviceName" with your own in [setup.demo.json](https://github.com/davidayalas/aws-ftp-s3-serverless/blob/master/setup.demo.json#L2)
 * Execute [first-deploy.sh](first-deploy.sh) (give it executable permissions)
 
-        $ sh first-deploy.sh
+        $ chmod +x first-deploy.sh && sh first-deploy.sh
 
 * It will modify and upload some files in order to make all work. If SAML login doesn't work, upload manually [docs/sp-metadata.xml](docs/sp-metadata.xml) to https://samltest.id/upload.php
 
