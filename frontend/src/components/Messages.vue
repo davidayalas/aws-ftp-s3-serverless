@@ -1,5 +1,5 @@
 <template>
-  <section v-if="logged"> 
+  <section v-if="isLogged"> 
     <div id="loader" class="loading" v-if="loading">Loading&#8230;</div>
     <div id="message">
       <div>
@@ -158,6 +158,6 @@
 
   export default {
     name : 'MessagesComponent',
-    props : ['loading','message','logged']
+    props : ['loading','message','isLogged']
   }
 </script>

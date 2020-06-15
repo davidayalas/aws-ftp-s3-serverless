@@ -3,19 +3,19 @@
 
     <Messages v-bind:loading="loading"  
               v-bind:message="message" 
-              v-bind:logged="logged"
+              v-bind:isLogged="isLogged"
     />
 
-    <Login @action="actionControler" 
-           @logged="setLogged"
-           v-bind:logged="logged"
+    <Login @logged="setLogged"
+           @browse="browseControler"
+           v-bind:isLogged="isLogged"
     />
 
     <Controls @action="actionControler" 
               v-bind:isRoot="isRoot"
               v-bind:isRootForUser="isRootForUser"
               v-bind:userName="userName"
-              v-bind:logged="logged"
+              v-bind:isLogged="isLogged"
     />
 
     <Browser @browse="browseControler" 
@@ -24,20 +24,20 @@
              v-bind:isRoot="isRoot"
              v-bind:loading="loading"   
              v-bind:isRootForUser="isRootForUser"
-             v-bind:logged="logged"
+             v-bind:isLogged="isLogged"
     />
 
     <Upload @action="actionControler" 
             v-bind:isRoot="isRoot"
             v-bind:uploadMsg="uploadMsg"
-            v-bind:logged="logged"
+            v-bind:isLogged="isLogged"
             v-bind:isRootForUser="isRootForUser"
     />
 
     <Log v-bind:log="log" 
          v-bind:updates="updates" 
          v-bind:isRoot="isRoot"
-         v-bind:logged="logged"
+         v-bind:isLogged="isLogged"
     />
 
   </div>
@@ -126,7 +126,7 @@
         isRoot : true,
         isRootForUser : true,
         log : [],
-        logged : false,
+        isLogged : false,
         updates : {},
         userName : ""
       }
@@ -145,7 +145,7 @@
       },
       setLogged(data) {
         this.userName = data.name || null;
-        this.logged = data.logged;
+        this.isLogged = data.isLogged;
       },
       isValidToken() {
         if(!window.localStorage.getItem("token") || (((+new Date()/1000)+60)>window.localStorage.getItem("token_ttl"))){
@@ -156,7 +156,7 @@
       async actionControler(action, data) {
         this.loading = true;
         if(!this.isValidToken()){
-          this.setLogged({logged:false});
+          this.setLogged({isLogged:false, name: null});
           this.loading = false;
         }
         //action to do
@@ -165,7 +165,6 @@
             this.browseControler(data, 'forward');
             break;
           }
-          
           case "create": {
             var folder = prompt("Folder name", "folder");
             if(folder){
@@ -260,10 +259,12 @@
         }
         this.loading = false;
       },
+
       async browseControler(path='', route='forward') {
         this.loading = true;
+
         if(!this.isValidToken()){
-          this.setLogged(false);
+          this.setLogged({isLogged : false, name: null});
           this.loading = false;
         }
         //path management

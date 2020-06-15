@@ -1,5 +1,5 @@
 <template>
-  <div id="browser" v-if="logged">
+  <div id="browser" v-if="isLogged">
     <table id="contents">
       <!-- Breadcrumbs -->
       <tr v-if="currentDir">
@@ -93,7 +93,7 @@
 
   export default {
     name : 'BrowserComponent',
-    props : ['s3data','currentDir', 'loading', 'isRoot', 'isRootForUser', 'logged'],
+    props : ['s3data','currentDir', 'loading', 'isRoot', 'isRootForUser', 'isLogged'],
     methods: {
         sendBrowse(path='', route='forward') {
           this.$emit('browse', path, route);

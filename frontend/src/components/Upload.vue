@@ -1,5 +1,5 @@
 <template>
-  <div id="upload-area" v-if="logged && !isRoot && !isRootForUser"
+  <div id="upload-area" v-if="isLogged && !isRoot && !isRootForUser"
     v-on:dragover.stop.prevent="uploadMessage('Upload')"
     v-on:dragleave.stop.prevent="uploadMessage('Drag content or click here')"
     v-on:drop.stop.prevent="drop"
@@ -35,7 +35,7 @@
 
   export default {
   name : 'ControlsComponent',
-  props : ['isRoot','uploadMsg', 'logged', 'isRootForUser'],
+  props : ['isRoot','uploadMsg', 'isLogged', 'isRootForUser'],
   watch: { 
     uploadMsg: function(msg) { 
       this.uploadMessage(msg);

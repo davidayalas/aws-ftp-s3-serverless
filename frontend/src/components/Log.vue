@@ -1,5 +1,5 @@
 <template>
-  <section v-if="logged && !isRoot"> 
+  <section v-if="isLogged && !isRoot"> 
     <div class="log-area" ref="logs">
         <template v-for="item in log">
             <span :key="item.name + item.randomKey" v-if="item.uploading" :class='"ftps3-action-log-"+cleanName(item.name)'><span>Uploading </span> {{item.path}}{{item.name}}</span>
@@ -31,7 +31,7 @@
  
   export default {
     name : 'LogComponent',
-    props : ['log', 'updates', 'isRoot', 'logged'],
+    props : ['log', 'updates', 'isRoot', 'isLogged'],
     data() {
       return {
           localUpdates : []

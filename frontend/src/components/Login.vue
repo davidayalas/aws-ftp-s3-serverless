@@ -1,8 +1,8 @@
 <template>
-  <section id="loginContainer" v-if="!logged">  {{logged}}
+  <section id="loginContainer" v-if="!isLogged">
   <div class="type-1">
       <div>
-          <a href="#" id="login" class="btn btn-2" v-on:click.prevent="doLogin()" v-if="!logged">
+          <a href="#" id="login" class="btn btn-2" v-on:click.prevent="doLogin()">
               <span class="txt">Log in with SAML</span>
               <span class="round"><i class="fa fa-chevron-right"></i></span>
           </a>
@@ -116,54 +116,55 @@
   }
 
   export default {
-  name : 'LoginComponent',
-  props : ['logged'],
-  mounted: function () {
-    const that = this;
-    const token_ttl=window.localStorage.getItem("token_ttl");
+    name : 'LoginComponent',
+    props : ['isLogged'],
+    mounted: function () {
+      const that = this;
+      const token_ttl=window.localStorage.getItem("token_ttl");
 
-    window.addEventListener('message', function(e) {
-      if(endpoint.get().indexOf(e.origin)!==0){
-        return;
+      window.addEventListener('message', function(e) {
+        if(endpoint.get().indexOf(e.origin)!==0){
+          return;
+        }
+        const message = JSON.parse(decoder(e.data.split(".")[1]));
+        window.localStorage.setItem("token_ttl", message.exp);
+        window.localStorage.setItem("token", e.data);
+        window.localStorage.setItem("token_name", message["urn:oid:2.5.4.42"]);
+        window.localStorage.setItem("token_email", message["urn:oid:0.9.2342.19200300.100.1.3"]);
+        window.LoginWindow.close();
+        //showName();
+        that.emitLogged({isLogged : true, name : message["urn:oid:2.5.4.42"]});
+      });
+      
+      if((+new Date()/1000)>token_ttl){
+        window.localStorage.removeItem("token");
+        window.localStorage.removeItem("token_ttl");
+        window.localStorage.removeItem("token_name");
+        window.localStorage.removeItem("token_email");
+        that.emitLogged({isLogged : false, name : null});
+      }else{
+        that.emitLogged({isLogged : true, name : window.localStorage.getItem("token_name")});
       }
-      const message = JSON.parse(decoder(e.data.split(".")[1]));
-      window.localStorage.setItem("token_ttl", message.exp);
-      window.localStorage.setItem("token", e.data);
-      window.localStorage.setItem("token_name", message["urn:oid:2.5.4.42"]);
-      window.localStorage.setItem("token_email", message["urn:oid:0.9.2342.19200300.100.1.3"]);
-      window.LoginWindow.close();
-      //showName();
-      that.emitLogged(message["urn:oid:2.5.4.42"]);
-    });
-    
-    if((+new Date()/1000)>token_ttl){
-      window.localStorage.removeItem("token");
-      window.localStorage.removeItem("token_ttl");
-      window.localStorage.removeItem("token_name");
-      window.localStorage.removeItem("token_email");
-      that.emitLogged(null);
-    }else{
-      that.emitLogged(window.localStorage.getItem("token_name"));
-    }
-  },
-  methods: {
-    doLogin() {
-      const w=430, h=430;
-      const dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : screen.left;  
-      const dualScreenTop = window.screenTop != undefined ? window.screenTop : screen.top;  
-      const width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;  
-      const height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;  
-      const left = ((width / 2) - (w / 2)) + dualScreenLeft;  
-      const top = ((height / 2) - (h / 2)) + dualScreenTop;  
-      window.LoginWindow = window.open(endpoint.get()+"/getJWT", "Login", 'scrollbars=yes, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);  
-      if (window.focus) {  
-        window.LoginWindow.focus();  
-      }  
     },
-    emitLogged(name) {
-      this.$emit("logged", {"logged": true, "name": name});
-      this.$emit('action', 'browse');
+    methods: {
+      doLogin() {
+        const w=430, h=430;
+        const dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : screen.left;  
+        const dualScreenTop = window.screenTop != undefined ? window.screenTop : screen.top;  
+        const width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;  
+        const height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;  
+        const left = ((width / 2) - (w / 2)) + dualScreenLeft;  
+        const top = ((height / 2) - (h / 2)) + dualScreenTop;  
+        window.LoginWindow = window.open(endpoint.get()+"/getJWT", "Login", 'scrollbars=yes, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);  
+        if (window.focus) {  
+          window.LoginWindow.focus();  
+        }  
+      },
+      emitLogged(data) {
+        this.$emit("logged", data);
+        //this.$emit('action', 'browse');
+        this.$emit('browse', '');
+      }
     }
-  }
   }
 </script>
