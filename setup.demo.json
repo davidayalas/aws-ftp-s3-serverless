@@ -1,5 +1,5 @@
 {
-    "serviceName" : "asancho-wftp-serverless",
+    "serviceName" : "ftp-serverless",
     "frontendBucket" : "web",
     "dataBucket" : "data"
 }
