@@ -13,10 +13,12 @@ function execShellCommand(cmd) {
 }
 
 
+
 async function main(){ 
   const _setupFile = './setup.demo.json';
   const _frontendEndpointFolder = './frontend/src/assets/js/';
   const _spMetadataFolder = './docs/';
+  const _dataPermissionsFolder = './data/';
   let setup = fs.readFileSync(_setupFile, 'utf8');
 
   if(setup){
@@ -32,6 +34,7 @@ async function main(){
     }
     
     const serviceName = setup.serviceName;
+    const dataBucket = setup.dataBucket;
     const stage = "demo";
     const api_id = await execShellCommand("sls info | grep GET -m 1 | awk -F[/:] '{printf \$4}'");
 
@@ -45,6 +48,12 @@ async function main(){
     sampleEndpoint = sampleEndpoint.replace("{api_id}",api_id).replace("{stage}",stage);
     fs.writeFileSync(_frontendEndpointFolder+"endpoint.js",sampleEndpoint);
     console.log(_frontendEndpointFolder+"endpoint.js successfully generated");
+
+    //permissions.csv
+    let sampleDataPermissions = fs.readFileSync(_dataPermissionsFolder+"sample-permissions.csv", 'utf8');
+    sampleDataPermissions = sampleDataPermissions.replace(/{serviceName}/g,serviceName).replace(/{dataBucket}/g,dataBucket);
+    fs.writeFileSync(_dataPermissionsFolder+"permissions.csv",sampleDataPermissions);
+    console.log(_dataPermissionsFolder+"permissions.csv successfully generated");
 
     //sp-metadata.xml
     let metadataFile = fs.readFileSync(_spMetadataFolder+"sample-sp-metadata.xml", 'utf8');
